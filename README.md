@@ -2,10 +2,6 @@ Pyverilog
 ==============================
 
 Python-based Hardware Design Processing Toolkit for Verilog HDL
-
-What's Pyverilog?
-==============================
-
 Pyverilog is an open-source hardware design processing toolkit for Verilog HDL.
 
 This software includes various tools for Verilog HDL design.
@@ -27,18 +23,6 @@ Prerequisites
 * Jinja2 (2.7 or later)
    - ast\_code\_generator requires jinja2 module.
 
-Installation
-==============================
-
-If you want to use Pyverilog as a general library, you can install on your environment by using setup.py.
-If Python 2.7 is used,
-
-    python setup.py install
-
-If Python 3.x is used,
-
-    python3 setup.py install
-
 Hands on Tutorial
 ==============================
 
@@ -47,49 +31,45 @@ Git Clone Our Tutorial
 
     git clone git@github.com:gayatri267/PyverilogTutorial.git
     
-First, please prepare a Verilog HDL source file as below. The file name is 'test.v'.
-This sample design adds the input value internally whtn the enable signal is asserted. Then is outputs its partial value to the LED.
 
-```verilog
-module top
-  (
-   input CLK, 
-   input RST,
-   input enable,
-   input [31:0] value,
-   output [7:0] led
-  );
-  reg [31:0] count;
-  reg [7:0] state;
-  assign led = count[23:16];
-  always @(posedge CLK) begin
-    if(RST) begin
-      count <= 0;
-      state <= 0;
-    end else begin
-      if(state == 0) begin
-        if(enable) state <= 1;
-      end else if(state == 1) begin
-        state <= 2;
-      end else if(state == 2) begin
-        count <= count + value;
-        state <= 0;
-      end
-    end
-  end
-endmodule
-```
+Do the following Installations
+------------------------------------
+Please make sure you have python2.7 Installed before continuing with this tutorial.
+Some of the commands in this tutorial can only be run using Python 2.7, while others can be run using Python 2.7 or Python 3
+(We will specify during the commands if python2.7 is to be explicitly used)
 
-Code parser
+1. Go into the pyverilog-0.9.1 directory in the cloned repository
+    cd pyverilog-0.9.1
+    
+2. Install the pyverilog library using setup.py.
+If Python 2.7 is used,
+    python setup.py install
+
+If Python 3.x is used,
+    python3 setup.py install
+    
+3. Install iverilog as below 
+    sudo apt-get install iverilog
+    
+4. Install Pygraphviz as below (Note that Python3 does not support Pygraphviz and hence only Python2.7 is to be installed)
+    sudo apt-get install -y python-pygraphviz
+    
+5. Install Jinja 2 as below
+    sudo apt install python-pip
+    pip install jinja2
+    
+Example 1 (test.v)
+-----------------------------
+Let's try to use pyverilog tools on the verilog module test.v(already present in the pyverilog-0.9.1 directory)
+This sample design adds the input value internally whtn the enable signal is asserted. Then it outputs its partial value to the LED.
+
+###Code parser###
 ------------------------------
+Code parer is the syntax analysis. Please type the command as below.
 
-Let's try syntax analysis. Please type the command as below.
+    python pyverilog/vparser/parser.py test.v
 
-```
-python3 pyverilog/vparser/parser.py test.v
-```
-
-Then you got the result as below. The result of syntax analysis is displayed.
+The result of syntax analysis is displayed.
 
 ```
 Source: 
@@ -200,16 +180,12 @@ Source:
                           IntConst: 0
 ```
 
-Dataflow analyzer
-------------------------------
+###Dataflow analyzer###
+Let's try dataflow analysis. It is used to establish the relationship between outputs with inputs and states
 
-Let's try dataflow analysis. Please type the command as below.
+    python3 pyverilog/dataflow/dataflow_analyzer.py -t top test.v 
 
-```
-python3 pyverilog/dataflow/dataflow_analyzer.py -t top test.v 
-```
-
-Then you got the result as below. The result of each signal definition and each signal assignment are displayed.
+The result of each signal definition and each signal assignment are displayed.
 
 ```
 Directive:
@@ -229,26 +205,21 @@ Bind:
 (Bind dest:top.led tree:(Partselect Var:(Terminal top.count) MSB:(IntConst 23) LSB:(IntConst 16)))
 ```
 
-Let's view the result of dataflow analysis as a picture file. Now we select 'led' as the target. Please type the command as below.
+To view the result of dataflow analysis as a picture file, need to run the command as below (we select output port 'led' as the target for example)
 
-```
-python3 pyverilog/dataflow/graphgen.py -t top -s top.led test.v 
-```
+    python3 pyverilog/dataflow/graphgen.py -t top -s top.led test.v 
 
-Then you got a png file (out.png). The picture shows that the definition of 'led' is a part-selection of 'count' from 23-bit to 16-bit.
+out.png file will now be generated which has the definition of 'led' is a part-selection of 'count' from 23-bit to 16-bit.
 
 ![out.png](http://cdn-ak.f.st-hatena.com/images/fotolife/s/sxhxtxa/20140101/20140101045641.png)
 
-Control-flow analyzer
-------------------------------
+###Control-flow analyzer###
+Control-flow analysis can be used to picturize how the state diagram of the RTL module look like
 
-Let's try control-flow analysis. Please type the command as below.
+    python2.7 pyverilog/controlflow/controlflow_analyzer.py -t top test.v 
+(Note that only python2.7 can be used to this command as it internally uses Pygraphviz)
 
-```
-python2.7 pyverilog/controlflow/controlflow_analyzer.py -t top test.v 
-```
-
-Then you got the result as below. The result shows that the state machine structure and transition conditions to the next state in the state machine.
+We get the output as below, which shows the state machine structure and transition conditions to the next state in the state machine.
 
 ```
 FSM signal: top.count, Condition list length: 4
@@ -265,41 +236,19 @@ Loop
 (0, 1, 2)
 ```
 
-You got also a png file (top_state.png). The picture shows that the graphical structure of the state machine.
+top_state.png is also generated which is the graphical representation of the state machine.
 
 ![top_state.png](http://cdn-ak.f.st-hatena.com/images/fotolife/s/sxhxtxa/20140101/20140101045835.png)
 
-Code generator
-------------------------------
- 
-Finally, let's try code generation. Please prepare a Python script as below. The file name is 'test.py'.
+###Code generator### 
+Finally, pyverilog can be used to generate verilog code from the AST representation of RTL. We will be using 'test.py' for demonstrate
 A Verilog HDL code is represented by using the AST classes defined in 'vparser.ast'.
-
-```python
-import pyverilog.vparser.ast as vast
-from pyverilog.ast_code_generator.codegen import ASTCodeGenerator
-
-params = vast.Paramlist(())
-clk = vast.Ioport( vast.Input('CLK') )
-rst = vast.Ioport( vast.Input('RST') )
-width = vast.Width( vast.IntConst('7'), vast.IntConst('0') )
-led = vast.Ioport( vast.Output('led', width=width) )
-ports = vast.Portlist( (clk, rst, led) )
-items = ( vast.Assign( vast.Identifier('led'), vast.IntConst('8') ) ,)
-ast = vast.ModuleDef("top", params, ports, items)
-
-codegen = ASTCodeGenerator()
-rslt = codegen.visit(ast)
-print(rslt)
+Run the below command to see how AST representation in test.py gets translated to verilog code
+```
+python test.py
 ```
 
-Please type the command as below at the same directory with Pyverilog.
-
-```
-python3 test.py
-```
-
-Then Verilog HDL code generated from the AST instances is displayed.
+Verilog code generated from the AST instances is as below:
 
 ```verilog
 
@@ -314,14 +263,3 @@ output [7:0] led
 endmodule
 
 ```
-
-
-Related Project and Site
-==============================
-
-[PyCoRAM](http://shtaxxx.github.io/PyCoRAM/)
-- Python-based Portable IP-core Synthesis Framework for FPGA-based Computing
-
-[shtaxxx.hatenablog.com](http://shtaxxx.hatenablog.com/entry/2014/01/01/045856)
-- Blog entry for introduction and examples of Pyverilog (in Japansese)
-
