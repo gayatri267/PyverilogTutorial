@@ -43,20 +43,30 @@ Some of the commands in this tutorial can only be run using Python 2.7, while ot
     
 2. Install the pyverilog library using setup.py.
     1. If Python 2.7 is used,
-    ```python setup.py install```
+    ```
+    python setup.py install
+    ```
 
     2. If Python 3.x is used,
-    ```python3 setup.py install```
+    ```
+    python3 setup.py install
+    ```
     
 3. Install iverilog as below 
-    ```sudo apt-get install iverilog```
+    ```
+    sudo apt-get install iverilog
+    ```
     
 4. Install Pygraphviz as below (Note that Python3 does not support Pygraphviz and hence only Python2.7 is to be installed)
-    ```sudo apt-get install -y python-pygraphviz```
+    ```
+    sudo apt-get install -y python-pygraphviz
+    ```
     
 5. Install Jinja 2 as below
-    ```sudo apt install python-pip
-    pip install jinja2```
+    ```
+    sudo apt install python-pip
+    pip install jinja2
+    ```
     
 Example 1 (test.v)
 -----------------------------
