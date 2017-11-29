@@ -272,3 +272,429 @@ output [7:0] led
 endmodule
 
 ```
+
+Example 2 (fsm.v)
+-----------------------------
+Let's try to use pyverilog tools on the verilog module fsm.v(already present in the pyverilog-0.9.1 directory)
+
+
+### Code parser
+Code parer is the syntax analysis. Please type the command as below.
+
+    python pyverilog/vparser/parser.py fsm.v
+
+The result of syntax analysis is displayed.
+
+```
+Source:
+  Description:
+    ModuleDef: fsm2
+      Paramlist:
+      Portlist:
+        Port: clock, None
+        Port: reset, None
+        Port: req_0, None
+        Port: req_1, None
+        Port: gnt_0, None
+        Port: gnt_1, None
+      Decl:
+        Input: clock, False
+          Width:
+            IntConst: 0
+            IntConst: 0
+        Input: reset, False
+          Width:
+            IntConst: 0
+            IntConst: 0
+        Input: req_0, False
+          Width:
+            IntConst: 0
+            IntConst: 0
+        Input: req_1, False
+          Width:
+            IntConst: 0
+            IntConst: 0
+      Decl:
+        Output: gnt_0, False
+          Width:
+            IntConst: 0
+            IntConst: 0
+        Output: gnt_1, False
+          Width:
+            IntConst: 0
+            IntConst: 0
+      Decl:
+        Wire: clock, False
+          Width:
+            IntConst: 0
+            IntConst: 0
+        Wire: reset, False
+          Width:
+            IntConst: 0
+            IntConst: 0
+        Wire: req_0, False
+          Width:
+            IntConst: 0
+            IntConst: 0
+        Wire: req_1, False
+          Width:
+            IntConst: 0
+            IntConst: 0
+      Decl:
+        Reg: gnt_0, False
+          Width:
+            IntConst: 0
+            IntConst: 0
+        Reg: gnt_1, False
+          Width:
+            IntConst: 0
+            IntConst: 0
+      Decl:
+        Parameter: SIZE, False
+          Rvalue:
+            IntConst: 3
+      Decl:
+        Parameter: IDLE, False
+          Rvalue:
+            IntConst: 3'b001
+        Parameter: GNT0, False
+          Rvalue:
+            IntConst: 3'b010
+        Parameter: GNT1, False
+          Rvalue:
+            IntConst: 3'b100
+      Decl:
+        Reg: state, False
+          Width:
+            Minus:
+              Identifier: SIZE
+              IntConst: 1
+            IntConst: 0
+      Decl:
+        Reg: next_state, False
+          Width:
+            Minus:
+              Identifier: SIZE
+              IntConst: 1
+            IntConst: 0
+      Always:
+        SensList:
+          Sens: level
+            Identifier: state
+          Sens: level
+            Identifier: req_0
+          Sens: level
+            Identifier: req_1
+        Block: FSM_COMBO
+          BlockingSubstitution:
+            Lvalue:
+              Identifier: next_state
+            Rvalue:
+              IntConst: 3'b000
+          CaseStatement:
+            Identifier: state
+            Case:
+              Identifier: IDLE
+              IfStatement:
+                Eq:
+                  Identifier: req_0
+                  IntConst: 1'b1
+                Block: None
+                  BlockingSubstitution:
+                    Lvalue:
+                      Identifier: next_state
+                    Rvalue:
+                      Identifier: GNT0
+                IfStatement:
+                  Eq:
+                    Identifier: req_1
+                    IntConst: 1'b1
+                  Block: None
+                    BlockingSubstitution:
+                      Lvalue:
+                        Identifier: next_state
+                      Rvalue:
+                        Identifier: GNT1
+                  Block: None
+                    BlockingSubstitution:
+                      Lvalue:
+                        Identifier: next_state
+                      Rvalue:
+                        Identifier: IDLE
+            Case:
+              Identifier: GNT0
+              IfStatement:
+                Eq:
+                  Identifier: req_0
+                  IntConst: 1'b1
+                Block: None
+                  BlockingSubstitution:
+                    Lvalue:
+                      Identifier: next_state
+                    Rvalue:
+                      Identifier: GNT0
+                Block: None
+                  BlockingSubstitution:
+                    Lvalue:
+                      Identifier: next_state
+                    Rvalue:
+                      Identifier: IDLE
+            Case:
+              Identifier: GNT1
+              IfStatement:
+                Eq:
+                  Identifier: req_1
+                  IntConst: 1'b1
+                Block: None
+                  BlockingSubstitution:
+                    Lvalue:
+                      Identifier: next_state
+                    Rvalue:
+                      Identifier: GNT1
+                Block: None
+                  BlockingSubstitution:
+                    Lvalue:
+                      Identifier: next_state
+                    Rvalue:
+                      Identifier: IDLE
+            Case:
+              BlockingSubstitution:
+                Lvalue:
+                  Identifier: next_state
+                Rvalue:
+                  Identifier: IDLE
+      Always:
+        SensList:
+          Sens: posedge
+            Identifier: clock
+        Block: FSM_SEQ
+          IfStatement:
+            Eq:
+              Identifier: reset
+              IntConst: 1'b1
+            Block: None
+              NonblockingSubstitution:
+                Lvalue:
+                  Identifier: state
+                Rvalue:
+                  Identifier: IDLE
+                DelayStatement:
+                  IntConst: 1
+            Block: None
+              NonblockingSubstitution:
+                Lvalue:
+                  Identifier: state
+                Rvalue:
+                  Identifier: next_state
+                DelayStatement:
+                  IntConst: 1
+      Always:
+        SensList:
+          Sens: posedge
+            Identifier: clock
+        Block: OUTPUT_LOGIC
+          IfStatement:
+            Eq:
+              Identifier: reset
+              IntConst: 1'b1
+            Block: None
+              NonblockingSubstitution:
+                Lvalue:
+                  Identifier: gnt_0
+                Rvalue:
+                  IntConst: 1'b0
+                DelayStatement:
+                  IntConst: 1
+              NonblockingSubstitution:
+                Lvalue:
+                  Identifier: gnt_1
+                Rvalue:
+                  IntConst: 1'b0
+                DelayStatement:
+                  IntConst: 1
+            Block: None
+              CaseStatement:
+                Identifier: state
+                Case:
+                  Identifier: IDLE
+                  Block: None
+                    NonblockingSubstitution:
+                      Lvalue:
+                        Identifier: gnt_0
+                      Rvalue:
+                        IntConst: 1'b0
+                      DelayStatement:
+                        IntConst: 1
+                    NonblockingSubstitution:
+                      Lvalue:
+                        Identifier: gnt_1
+                      Rvalue:
+                        IntConst: 1'b0
+                      DelayStatement:
+                        IntConst: 1
+                Case:
+                  Identifier: GNT0
+                  Block: None
+                    NonblockingSubstitution:
+                      Lvalue:
+                        Identifier: gnt_0
+                      Rvalue:
+                        IntConst: 1'b1
+                      DelayStatement:
+                        IntConst: 1
+                    NonblockingSubstitution:
+                      Lvalue:
+                        Identifier: gnt_1
+                      Rvalue:
+                        IntConst: 1'b0
+                      DelayStatement:
+                        IntConst: 1
+                Case:
+                  Identifier: GNT1
+                  Block: None
+                    NonblockingSubstitution:
+                      Lvalue:
+                        Identifier: gnt_0
+                      Rvalue:
+                        IntConst: 1'b0
+                      DelayStatement:
+                        IntConst: 1
+                    NonblockingSubstitution:
+                      Lvalue:
+                        Identifier: gnt_1
+                      Rvalue:
+                        IntConst: 1'b1
+                      DelayStatement:
+                        IntConst: 1
+                Case:
+                  Block: None
+                    NonblockingSubstitution:
+                      Lvalue:
+                        Identifier: gnt_0
+                      Rvalue:
+                        IntConst: 1'b0
+                      DelayStatement:
+                        IntConst: 1
+                    NonblockingSubstitution:
+                      Lvalue:
+                        Identifier: gnt_1
+                      Rvalue:
+                        IntConst: 1'b0
+                      DelayStatement:
+                        IntConst: 1
+```
+
+### Dataflow analyzer
+Let's try dataflow analysis. It is used to establish the relationship between outputs with inputs and states
+
+    python3 pyverilog/dataflow/dataflow_analyzer.py -t fsm fsm.v 
+
+The result of each signal definition and each signal assignment are displayed.
+
+```
+Directive:
+Instance:
+(fsm2, 'fsm2')
+Term:
+(Term name:fsm2.next_state type:{'Reg'} msb:(Operator Minus Next:(Terminal fsm2.SIZE),(IntConst 1)) lsb:(IntConst 0))
+(Term name:fsm2._rn0_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm2.SIZE),(IntConst 1)) lsb:(IntConst 0))
+(Term name:fsm2.gnt_0 type:{'Reg', 'Output'} msb:(IntConst 0) lsb:(IntConst 0))
+(Term name:fsm2._rn2_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm2.SIZE),(IntConst 1)) lsb:(IntConst 0))
+(Term name:fsm2._rn3_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm2.SIZE),(IntConst 1)) lsb:(IntConst 0))
+(Term name:fsm2._rn6_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm2.SIZE),(IntConst 1)) lsb:(IntConst 0))
+(Term name:fsm2.req_0 type:{'Input', 'Wire'} msb:(IntConst 0) lsb:(IntConst 0))
+(Term name:fsm2.req_1 type:{'Input', 'Wire'} msb:(IntConst 0) lsb:(IntConst 0))
+(Term name:fsm2.IDLE type:{'Parameter'} msb:'d31 lsb:'d0)
+(Term name:fsm2.GNT0 type:{'Parameter'} msb:'d31 lsb:'d0)
+(Term name:fsm2.SIZE type:{'Parameter'} msb:'d31 lsb:'d0)
+(Term name:fsm2._rn1_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm2.SIZE),(IntConst 1)) lsb:(IntConst 0))
+(Term name:fsm2.clock type:{'Input', 'Wire'} msb:(IntConst 0) lsb:(IntConst 0))
+(Term name:fsm2.reset type:{'Input', 'Wire'} msb:(IntConst 0) lsb:(IntConst 0))
+(Term name:fsm2._rn8_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm2.SIZE),(IntConst 1)) lsb:(IntConst 0))
+(Term name:fsm2.gnt_1 type:{'Reg', 'Output'} msb:(IntConst 0) lsb:(IntConst 0))
+(Term name:fsm2._rn5_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm2.SIZE),(IntConst 1)) lsb:(IntConst 0))
+(Term name:fsm2.GNT1 type:{'Parameter'} msb:'d31 lsb:'d0)
+(Term name:fsm2._rn4_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm2.SIZE),(IntConst 1)) lsb:(IntConst 0))
+(Term name:fsm2._rn7_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm2.SIZE),(IntConst 1)) lsb:(IntConst 0))
+(Term name:fsm2.state type:{'Reg'} msb:(Operator Minus Next:(Terminal fsm2.SIZE),(IntConst 1)) lsb:(IntConst 0))
+Bind:
+(Bind dest:fsm2.next_state tree:(Branch Cond:(Operator Eq Next:(Terminal fsm2.state),(Terminal fsm2.IDLE)) True:(Branch Cond:(Operator Eq Next:(Terminal fsm2.req_0),(IntConst 1'b1)) True:(Terminal fsm2._rn1_next_state) False:(Branch Cond:(Operator Eq Next:(Terminal fsm2.req_1),(IntConst 1'b1)) True:(Terminal fsm2._rn2_next_state) False:(Terminal fsm2._rn3_next_state))) False:(Branch Cond:(Operator Eq Next:(Terminal fsm2.state),(Terminal fsm2.GNT0)) True:(Branch Cond:(Operator Eq Next:(Terminal fsm2.req_0),(IntConst 1'b1)) True:(Terminal fsm2._rn4_next_state) False:(Terminal fsm2._rn5_next_state)) False:(Branch Cond:(Operator Eq Next:(Terminal fsm2.state),(Terminal fsm2.GNT1)) True:(Branch Cond:(Operator Eq Next:(Terminal fsm2.req_1),(IntConst 1'b1)) True:(Terminal fsm2._rn6_next_state) False:(Terminal fsm2._rn7_next_state)) False:(Branch Cond:(IntConst 1) True:(Terminal fsm2._rn8_next_state))))))
+(Bind dest:fsm2._rn0_next_state tree:(IntConst 3'b000))
+(Bind dest:fsm2.gnt_0 tree:(Branch Cond:(Operator Eq Next:(Terminal fsm2.reset),(IntConst 1'b1)) True:(IntConst 1'b0) False:(Branch Cond:(Operator Eq Next:(Terminal fsm2.state),(Terminal fsm2.IDLE)) True:(IntConst 1'b0) False:(Branch Cond:(Operator Eq Next:(Terminal fsm2.state),(Terminal fsm2.GNT0)) True:(IntConst 1'b1) False:(Branch Cond:(Operator Eq Next:(Terminal fsm2.state),(Terminal fsm2.GNT1)) True:(IntConst 1'b0) False:(Branch Cond:(IntConst 1) True:(IntConst 1'b0)))))))
+(Bind dest:fsm2._rn2_next_state tree:(Terminal fsm2.GNT1))
+(Bind dest:fsm2._rn3_next_state tree:(Terminal fsm2.IDLE))
+(Bind dest:fsm2.state tree:(Branch Cond:(Operator Eq Next:(Terminal fsm2.reset),(IntConst 1'b1)) True:(Terminal fsm2.IDLE) False:(Terminal fsm2.next_state)))
+(Bind dest:fsm2._rn6_next_state tree:(Terminal fsm2.GNT1))
+(Bind dest:fsm2.IDLE tree:(IntConst 3'b001))
+(Bind dest:fsm2.GNT0 tree:(IntConst 3'b010))
+(Bind dest:fsm2.SIZE tree:(IntConst 3))
+(Bind dest:fsm2._rn1_next_state tree:(Terminal fsm2.GNT0))
+(Bind dest:fsm2._rn8_next_state tree:(Terminal fsm2.IDLE))
+(Bind dest:fsm2.gnt_1 tree:(Branch Cond:(Operator Eq Next:(Terminal fsm2.reset),(IntConst 1'b1)) True:(IntConst 1'b0) False:(Branch Cond:(Operator Eq Next:(Terminal fsm2.state),(Terminal fsm2.IDLE)) True:(IntConst 1'b0) False:(Branch Cond:(Operator Eq Next:(Terminal fsm2.state),(Terminal fsm2.GNT0)) True:(IntConst 1'b0) False:(Branch Cond:(Operator Eq Next:(Terminal fsm2.state),(Terminal fsm2.GNT1)) True:(IntConst 1'b1) False:(Branch Cond:(IntConst 1) True:(IntConst 1'b0)))))))
+(Bind dest:fsm2.GNT1 tree:(IntConst 3'b100))
+(Bind dest:fsm2._rn4_next_state tree:(Terminal fsm2.GNT0))
+(Bind dest:fsm2._rn7_next_state tree:(Terminal fsm2.IDLE))
+(Bind dest:fsm2._rn5_next_state tree:(Terminal fsm2.IDLE))
+```
+
+To view the result of dataflow analysis as a picture file, need to run the command as below (we select output port 'fsm.gnt_0' as the target for example)
+
+    python pyverilog/dataflow/graphgen.py -t fsm -s fsm.gnt_0 fsm.v 
+
+out.png file will now be generated which has the definition of 'gnt_0'.
+
+![out.png](https://drive.google.com/file/d/1YCJZ198a4jnjtMBxkNEB159pFs3HHlhh/view?usp=sharing)
+
+### Control-flow analyzer
+Control-flow analysis can be used to picturize how the state diagram of the RTL module look like
+
+    python pyverilog/controlflow/controlflow_analyzer.py -t fsm fsm.v 
+(Note that only python2.7 can be used to this command as it internally uses Pygraphviz)
+
+We get the output as below, which shows the state machine structure and transition conditions to the next state in the state machine.
+
+```
+FSM signal: fsm2.gnt_1, Condition list length: 4
+Condition: (Eq,), Inferring transition condition
+Condition: (Ulnot, Eq), Inferring transition condition
+Condition: (Ulnot, Ulnot, Eq), Inferring transition condition
+Condition: (Ulnot, Ulnot, Ulnot), Inferring transition condition
+FSM signal: fsm2.gnt_0, Condition list length: 3
+Condition: (Eq,), Inferring transition condition
+Condition: (Ulnot, Eq), Inferring transition condition
+Condition: (Ulnot, Ulnot), Inferring transition condition
+FSM signal: fsm2.state, Condition list length: 8
+Condition: (Eq, Eq), Inferring transition condition
+Condition: (Eq, Ulnot, Ulnot), Inferring transition condition
+Condition: (Ulnot, Eq, Eq), Inferring transition condition
+Condition: (Ulnot, Ulnot, Ulnot), Inferring transition condition
+Condition: (Eq, Ulnot, Eq), Inferring transition condition
+Condition: (Ulnot, Eq, Ulnot), Inferring transition condition
+Condition: (Ulnot, Ulnot, Eq, Ulnot), Inferring transition condition
+Condition: (Ulnot, Ulnot, Eq, Eq), Inferring transition condition
+# SIGNAL NAME: fsm2.state
+# DELAY CNT: 0
+0 --None--> 1
+1 --((!(fsm2_req_0==1'd1))&&(!(fsm2_req_1==1'd1)))--> 1
+1 --(fsm2_req_0==1'd1)--> 2
+1 --((!(fsm2_req_0==1'd1))&&(fsm2_req_1==1'd1))--> 4
+2 --(fsm2_req_0==1'd1)--> 2
+2 --(!(fsm2_req_0==1'd1))--> 1
+3 --None--> 1
+4 --(!(fsm2_req_1==1'd1))--> 1
+4 --(fsm2_req_1==1'd1)--> 4
+5 --None--> 1
+6 --None--> 1
+7 --None--> 1
+Loop
+(1, 2)
+(2,)
+(1,)
+(1, 4)
+(4,)
+```
+
+fsm_state.png is also generated which is the graphical representation of the state machine.
+
+![fsm_state.png](https://drive.google.com/file/d/1D9hBez8kQRp5SKjboTjBAuvRO0QNQbah/view?usp=sharing)
+
