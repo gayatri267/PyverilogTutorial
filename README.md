@@ -249,7 +249,7 @@ top_state.png is also generated which is the graphical representation of the sta
 
 ![top_state.png](http://cdn-ak.f.st-hatena.com/images/fotolife/s/sxhxtxa/20140101/20140101045835.png)
 
-###Code Generator###
+### Code Generator
 Finally, pyverilog can be used to generate verilog code from the AST representation of RTL. We will be using 'test.py' for demonstrate
 A Verilog HDL code is represented by using the AST classes defined in 'vparser.ast'.
 Run the below command to see how AST representation in test.py gets translated to verilog code
