@@ -42,12 +42,12 @@ Some of the commands in this tutorial can only be run using Python 2.7, while ot
     cd pyverilog-0.9.1
     
 2. Install the pyverilog library using setup.py.
-    1. If Python 2.7 is used,
+    * If Python 2.7 is used,
     ```
     python setup.py install
     ```
 
-    2. If Python 3.x is used,
+    * If Python 3.x is used,
     ```
     python3 setup.py install
     ```
@@ -73,8 +73,7 @@ Example 1 (test.v)
 Let's try to use pyverilog tools on the verilog module test.v(already present in the pyverilog-0.9.1 directory)
 This sample design adds the input value internally whtn the enable signal is asserted. Then it outputs its partial value to the LED.
 
-###Code parser###
-------------------------------
+###Code parser
 Code parer is the syntax analysis. Please type the command as below.
 
     python pyverilog/vparser/parser.py test.v
@@ -190,7 +189,7 @@ Source:
                           IntConst: 0
 ```
 
-###Dataflow analyzer###
+###Dataflow analyzer
 Let's try dataflow analysis. It is used to establish the relationship between outputs with inputs and states
 
     python3 pyverilog/dataflow/dataflow_analyzer.py -t top test.v 
@@ -223,7 +222,7 @@ out.png file will now be generated which has the definition of 'led' is a part-s
 
 ![out.png](http://cdn-ak.f.st-hatena.com/images/fotolife/s/sxhxtxa/20140101/20140101045641.png)
 
-### Control-flow analyzer ###
+###Control-flow analyzer
 Control-flow analysis can be used to picturize how the state diagram of the RTL module look like
 
     python2.7 pyverilog/controlflow/controlflow_analyzer.py -t top test.v 
@@ -250,7 +249,7 @@ top_state.png is also generated which is the graphical representation of the sta
 
 ![top_state.png](http://cdn-ak.f.st-hatena.com/images/fotolife/s/sxhxtxa/20140101/20140101045835.png)
 
-###Code generator### 
+###Code Generator
 Finally, pyverilog can be used to generate verilog code from the AST representation of RTL. We will be using 'test.py' for demonstrate
 A Verilog HDL code is represented by using the AST classes defined in 'vparser.ast'.
 Run the below command to see how AST representation in test.py gets translated to verilog code
