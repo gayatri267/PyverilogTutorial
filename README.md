@@ -42,21 +42,21 @@ Some of the commands in this tutorial can only be run using Python 2.7, while ot
     cd pyverilog-0.9.1
     
 2. Install the pyverilog library using setup.py.
-If Python 2.7 is used,
-    python setup.py install
+    1. If Python 2.7 is used,
+    ```python setup.py install```
 
-If Python 3.x is used,
-    python3 setup.py install
+    2. If Python 3.x is used,
+    ```python3 setup.py install```
     
 3. Install iverilog as below 
-    sudo apt-get install iverilog
+    ```sudo apt-get install iverilog```
     
 4. Install Pygraphviz as below (Note that Python3 does not support Pygraphviz and hence only Python2.7 is to be installed)
-    sudo apt-get install -y python-pygraphviz
+    ```sudo apt-get install -y python-pygraphviz```
     
 5. Install Jinja 2 as below
-    sudo apt install python-pip
-    pip install jinja2
+    ```sudo apt install python-pip
+    pip install jinja2```
     
 Example 1 (test.v)
 -----------------------------
@@ -213,7 +213,7 @@ out.png file will now be generated which has the definition of 'led' is a part-s
 
 ![out.png](http://cdn-ak.f.st-hatena.com/images/fotolife/s/sxhxtxa/20140101/20140101045641.png)
 
-###Control-flow analyzer###
+### Control-flow analyzer ###
 Control-flow analysis can be used to picturize how the state diagram of the RTL module look like
 
     python2.7 pyverilog/controlflow/controlflow_analyzer.py -t top test.v 
