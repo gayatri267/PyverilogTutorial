@@ -3,43 +3,29 @@ Pyverilog
 
 Python-based Hardware Design Processing Toolkit for Verilog HDL
 
-Copyright (C) 2013, Shinya Takamaeda-Yamazaki
-
-E-mail: shinya\_at\_is.naist.jp
-
-
-License
-==============================
-
-Apache License 2.0
-(http://www.apache.org/licenses/LICENSE-2.0)
-
-This software package includes PLY-3.4 in "vparser/ply". The license of PLY is BSD.
-
-
 What's Pyverilog?
 ==============================
 
-Pyverilog is an open-source hardware design processing toolkit for Verilog HDL. All source codes are written in Python.
+Pyverilog is an open-source hardware design processing toolkit for Verilog HDL.
 
-Pyverilog includes **(1) code parser, (2) dataflow analyzer, (3) control-flow analyzer and (4) code generator**.
+This software includes various tools for Verilog HDL design.
+* vparser: Code parser to generate AST (Abstract Syntax Tree) from source codes of Verilog HDL.
+* dataflow: Dataflow analyzer with an optimizer to remove redundant expressions and some dataflow handling tools.
+* controlflow: Control-flow analyzer with condition analyzer that identify when a signal is activated.
+* ast\_code\_generator: Verilog HDL code generator from AST(Abstract Syntax Tree).
+
 You can create your own design analyzer, code translator and code generator of Verilog HDL based on this toolkit.
 
-
-Software Requirements
+Prerequisites
 ==============================
 
 * Python (2.7, 3.3 or later)
 * Icarus Verilog (0.9.6 or later)
    - pyverilog.vparser.preprocessor.py uses 'iverilog -E' command as the preprocessor.
-   - 'apt-get install iverilog'
 * Graphviz and Pygraphviz (Python3 does not support Pygraphviz)
    - pyverilog.dataflow.graphgen and pyverilog.controlflow.controlflow (without --nograph option) use Pygraphviz (on Python 2.7).
-   - If you do not use graphgen and controlflow (without --nograph) option, Python 3.x is fine.
 * Jinja2 (2.7 or later)
    - ast\_code\_generator requires jinja2 module.
-   - 'pip3 install jinja2' (for Python 3.x) or 'pip install jinja2' (for Python 2.7)
-
 
 Installation
 ==============================
@@ -53,21 +39,14 @@ If Python 3.x is used,
 
     python3 setup.py install
 
-
-Tools
+Hands on Tutorial
 ==============================
 
-This software includes various tools for Verilog HDL design.
+Git Clone Our Tutorial
+------------------------------
 
-* vparser: Code parser to generate AST (Abstract Syntax Tree) from source codes of Verilog HDL.
-* dataflow: Dataflow analyzer with an optimizer to remove redundant expressions and some dataflow handling tools.
-* controlflow: Control-flow analyzer with condition analyzer that identify when a signal is activated.
-* ast\_code\_generator: Verilog HDL code generator from AST.
-
-
-Getting Started
-==============================
-
+    git clone git@github.com:gayatri267/PyverilogTutorial.git
+    
 First, please prepare a Verilog HDL source file as below. The file name is 'test.v'.
 This sample design adds the input value internally whtn the enable signal is asserted. Then is outputs its partial value to the LED.
 
