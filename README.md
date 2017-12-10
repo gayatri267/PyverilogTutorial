@@ -695,6 +695,5 @@ Loop
 ```
 
 fsm_state.png is also generated which is the graphical representation of the state machine.
-![alt text][id]
-[id]: https://drive.google.com/uc?id=1D9hBez8kQRp5SKjboTjBAuvRO0QNQbah
+![alt text](https://drive.google.com/uc?id=1D9hBez8kQRp5SKjboTjBAuvRO0QNQbah)
 
