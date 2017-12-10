@@ -34,14 +34,30 @@ Git Clone Our Tutorial
 
 Do the following Installations
 ------------------------------------
+If you are using Linux, you can directly follow the instructions. In case you are using Windows, please install Bash for Windows using the link https://www.howtogeek.com/249966/how-to-install-and-use-the-linux-bash-shell-on-windows-10/. It will make the process easier.
 Please make sure you have python2.7 Installed before continuing with this tutorial.
 Some of the commands in this tutorial can only be run using Python 2.7, while others can be run using Python 2.7 or Python 3
 (We will specify during the commands if python2.7 is to be explicitly used)
 
 1. Go into the pyverilog-0.9.1 directory in the cloned repository
     cd pyverilog-0.9.1
+     
+2. Install iverilog as below 
+    ```
+    sudo apt-get install iverilog
+    ```
     
-2. Install the pyverilog library using setup.py.
+3. Install Pygraphviz as below (Note that Python3 does not support Pygraphviz and hence only Python2.7 is to be installed)
+    ```
+    sudo apt-get install -y python-pygraphviz
+    ```
+
+4. Install Jinja 2 as below
+    ```
+    sudo apt install python-pip
+    pip install jinja2
+    ```
+5. Install the pyverilog library using setup.py.
     * If Python 2.7 is used,
     ```
     python setup.py install
@@ -52,21 +68,7 @@ Some of the commands in this tutorial can only be run using Python 2.7, while ot
     python3 setup.py install
     ```
     
-3. Install iverilog as below 
-    ```
-    sudo apt-get install iverilog
-    ```
-    
-4. Install Pygraphviz as below (Note that Python3 does not support Pygraphviz and hence only Python2.7 is to be installed)
-    ```
-    sudo apt-get install -y python-pygraphviz
-    ```
-    
-5. Install Jinja 2 as below
-    ```
-    sudo apt install python-pip
-    pip install jinja2
-    ```
+
     
 Example 1 (test.v)
 -----------------------------
