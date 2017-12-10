@@ -60,12 +60,12 @@ Some of the commands in this tutorial can only be run using Python 2.7, while ot
 5. Install the pyverilog library using setup.py.
     * If Python 2.7 is used,
     ```
-    python setup.py install
+    sudo python setup.py install
     ```
 
     * If Python 3.x is used,
     ```
-    python3 setup.py install
+    sudo python3 setup.py install
     ```
     
 
@@ -218,7 +218,7 @@ Bind:
 
 To view the result of dataflow analysis as a picture file, need to run the command as below (we select output port 'led' as the target for example)
 
-    python3 pyverilog/dataflow/graphgen.py -t top -s top.led test.v 
+    python pyverilog/dataflow/graphgen.py -t top -s top.led test.v 
 
 out.png file will now be generated which has the definition of 'led' is a part-selection of 'count' from 23-bit to 16-bit.
 
