@@ -73,7 +73,7 @@ Example 1 (test.v)
 Let's try to use pyverilog tools on the verilog module test.v(already present in the pyverilog-0.9.1 directory)
 This sample design adds the input value internally whtn the enable signal is asserted. Then it outputs its partial value to the LED.
 
-###Code parser###
+### Code parser
 Code parer is the syntax analysis. Please type the command as below.
 
     python pyverilog/vparser/parser.py test.v
@@ -189,7 +189,7 @@ Source:
                           IntConst: 0
 ```
 
-###Dataflow analyzer###
+### Dataflow analyzer
 Let's try dataflow analysis. It is used to establish the relationship between outputs with inputs and states
 
     python3 pyverilog/dataflow/dataflow_analyzer.py -t top test.v 
@@ -222,7 +222,7 @@ out.png file will now be generated which has the definition of 'led' is a part-s
 
 ![out.png](http://cdn-ak.f.st-hatena.com/images/fotolife/s/sxhxtxa/20140101/20140101045641.png)
 
-###Control-flow analyzer###
+### Control-flow analyzer
 Control-flow analysis can be used to picturize how the state diagram of the RTL module look like
 
     python2.7 pyverilog/controlflow/controlflow_analyzer.py -t top test.v 
@@ -642,8 +642,7 @@ To view the result of dataflow analysis as a picture file, need to run the comma
     python pyverilog/dataflow/graphgen.py -t fsm -s fsm.gnt_0 fsm.v 
 
 out.png file will now be generated which has the definition of 'gnt_0'.
-
-![out.png](https://drive.google.com/file/d/1YCJZ198a4jnjtMBxkNEB159pFs3HHlhh/view?usp=sharing)
+![alt text](https://drive.google.com/uc?id=1YCJZ198a4jnjtMBxkNEB159pFs3HHlhh)
 
 ### Control-flow analyzer
 Control-flow analysis can be used to picturize how the state diagram of the RTL module look like
