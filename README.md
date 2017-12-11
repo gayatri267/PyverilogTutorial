@@ -803,7 +803,7 @@ top_state.png is also generated which is the graphical representation of the sta
 
 
 ### Reference
-This tutorial is based on "Official python Documentation for pyverilog" - https://pypi.python.org/pypi/pyverilog/0.9.1
+This tutorial is based on official python documentation for pyverilog - https://pypi.python.org/pypi/pyverilog/0.9.1
 
 
 
