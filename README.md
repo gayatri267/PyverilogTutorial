@@ -801,6 +801,10 @@ top_state.png is also generated which is the graphical representation of the sta
 
 ![top_state.png](http://cdn-ak.f.st-hatena.com/images/fotolife/s/sxhxtxa/20140101/20140101045835.png)
 
+Insights
+----------------------
+1. This python tool would be very using for RTL design/verification engineers to picturize the state machines and output functions to quickly glance for bugs.
+2. The controlflow graph portrays the state transitional relationships, but could be enhanced to show the input signals and their values that cause the transition from one state to another. 
 
 Reference
 ----------------
