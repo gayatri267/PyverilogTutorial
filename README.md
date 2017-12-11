@@ -69,214 +69,6 @@ Please make sure you have python2.7 installed before continuing with this tutori
     sudo python3 setup.py install
     ```
 
-    
-Example 1 (test.v)
------------------------------
-Let's try to use pyverilog tools on the verilog module test.v (already present in the pyverilog-0.9.1 directory)
-This sample design adds the input value internally when the enable signal is asserted. Then it outputs its partial value to the LED.
-
-### Code parser
-Code parser is for syntax analysis. Please type the command as below.
-
-    python pyverilog/vparser/parser.py test.v
-
-The result of syntax analysis is displayed.
-
-```
-Source: 
-  Description: 
-    ModuleDef: top
-      Paramlist: 
-      Portlist: 
-        Ioport: 
-          Input: CLK, False
-            Width: 
-              IntConst: 0
-              IntConst: 0
-        Ioport: 
-          Input: RST, False
-            Width: 
-              IntConst: 0
-              IntConst: 0
-        Ioport: 
-          Input: enable, False
-            Width: 
-              IntConst: 0
-              IntConst: 0
-        Ioport: 
-          Input: value, False
-            Width: 
-              IntConst: 31
-              IntConst: 0
-        Ioport: 
-          Output: led, False
-            Width: 
-              IntConst: 7
-              IntConst: 0
-      Decl: 
-        Reg: count, False
-          Width: 
-            IntConst: 31
-            IntConst: 0
-      Decl: 
-        Reg: state, False
-          Width: 
-            IntConst: 7
-            IntConst: 0
-      Assign: 
-        Lvalue: 
-          Identifier: led
-        Rvalue: 
-          Partselect: 
-            Identifier: count
-            IntConst: 23
-            IntConst: 16
-      Always: 
-        SensList: 
-          Sens: posedge
-            Identifier: CLK
-        Block: None
-          IfStatement: 
-            Identifier: RST
-            Block: None
-              NonblockingSubstitution: 
-                Lvalue: 
-                  Identifier: count
-                Rvalue: 
-                  IntConst: 0
-              NonblockingSubstitution: 
-                Lvalue: 
-                  Identifier: state
-                Rvalue: 
-                  IntConst: 0
-            Block: None
-              IfStatement: 
-                Eq: 
-                  Identifier: state
-                  IntConst: 0
-                Block: None
-                  IfStatement: 
-                    Identifier: enable
-                    NonblockingSubstitution: 
-                      Lvalue: 
-                        Identifier: state
-                      Rvalue: 
-                        IntConst: 1
-                IfStatement: 
-                  Eq: 
-                    Identifier: state
-                    IntConst: 1
-                  Block: None
-                    NonblockingSubstitution: 
-                      Lvalue: 
-                        Identifier: state
-                      Rvalue: 
-                        IntConst: 2
-                  IfStatement: 
-                    Eq: 
-                      Identifier: state
-                      IntConst: 2
-                    Block: None
-                      NonblockingSubstitution: 
-                        Lvalue: 
-                          Identifier: count
-                        Rvalue: 
-                          Plus: 
-                            Identifier: count
-                            Identifier: value
-                      NonblockingSubstitution: 
-                        Lvalue: 
-                          Identifier: state
-                        Rvalue: 
-                          IntConst: 0
-```
-
-### Dataflow analyzer
-Let's try dataflow analysis. It is used to establish the relationship between outputs with inputs and states.
-
-    python pyverilog/dataflow/dataflow_analyzer.py -t top test.v 
-
-The result of each signal definition and each signal assignment are displayed.
-
-```
-Directive:
-Instance:
-(top, 'top')
-Term:
-(Term name:top.led type:{'Output'} msb:(IntConst 7) lsb:(IntConst 0))
-(Term name:top.enable type:{'Input'} msb:(IntConst 0) lsb:(IntConst 0))
-(Term name:top.CLK type:{'Input'} msb:(IntConst 0) lsb:(IntConst 0))
-(Term name:top.count type:{'Reg'} msb:(IntConst 31) lsb:(IntConst 0))
-(Term name:top.state type:{'Reg'} msb:(IntConst 7) lsb:(IntConst 0))
-(Term name:top.RST type:{'Input'} msb:(IntConst 0) lsb:(IntConst 0))
-(Term name:top.value type:{'Input'} msb:(IntConst 31) lsb:(IntConst 0))
-Bind:
-(Bind dest:top.count tree:(Branch Cond:(Terminal top.RST) True:(IntConst 0) False:(Branch Cond:(Operator Eq Next:(Terminal top.state),(IntConst 0)) False:(Branch Cond:(Operator Eq Next:(Terminal top.state),(IntConst 1)) False:(Branch Cond:(Operator Eq Next:(Terminal top.state),(IntConst 2)) True:(Operator Plus Next:(Terminal top.count),(Terminal top.value)))))))
-(Bind dest:top.state tree:(Branch Cond:(Terminal top.RST) True:(IntConst 0) False:(Branch Cond:(Operator Eq Next:(Terminal top.state),(IntConst 0)) True:(Branch Cond:(Terminal top.enable) True:(IntConst 1)) False:(Branch Cond:(Operator Eq Next:(Terminal top.state),(IntConst 1)) True:(IntConst 2) False:(Branch Cond:(Operator Eq Next:(Terminal top.state),(IntConst 2)) True:(IntConst 0))))))
-(Bind dest:top.led tree:(Partselect Var:(Terminal top.count) MSB:(IntConst 23) LSB:(IntConst 16)))
-```
-
-To view the result of dataflow analysis as a picture file, you need to run the command as below (we select output port 'led' (an output port) as the target for example)
-
-    python2.7 pyverilog/dataflow/graphgen.py -t top -s top.led test.v
-(Note that only python2.7 can be used to this command as it internally uses Pygraphviz)    
-
-out.png file will now be generated which has the definition of 'led' is a part-selection of 'count' from 23-bit to 16-bit.
-
-
-![out.png](http://cdn-ak.f.st-hatena.com/images/fotolife/s/sxhxtxa/20140101/20140101045641.png)
-
-### Control-flow analyzer
-Control-flow analysis can be used to picturize how the state diagram of the RTL module looks like.
-
-    python2.7 pyverilog/controlflow/controlflow_analyzer.py -t top test.v 
-(Note that only python2.7 can be used to this command as it internally uses Pygraphviz)
-
-We get the output as below, which shows the state machine structure and transition conditions to the next state in the state machine.
-
-```
-FSM signal: top.count, Condition list length: 4
-FSM signal: top.state, Condition list length: 5
-Condition: (Ulnot, Eq), Inferring transition condition
-Condition: (Eq, top.enable), Inferring transition condition
-Condition: (Ulnot, Ulnot, Eq), Inferring transition condition
-# SIGNAL NAME: top.state
-# DELAY CNT: 0
-0 --(top_enable>'d0)--> 1
-1 --None--> 2
-2 --None--> 0
-Loop
-(0, 1, 2)
-```
-
-top_state.png is also generated which is the graphical representation of the state machine.
-
-
-![top_state.png](http://cdn-ak.f.st-hatena.com/images/fotolife/s/sxhxtxa/20140101/20140101045835.png)
-
-### Code Generator
-Finally, pyverilog can be used to generate verilog code from the AST representation of RTL. We will be using 'test.py' for demonstrate. <br />
-A Verilog HDL code is represented by using the AST classes defined in 'vparser.ast'.
-Run the below command to see how AST representation in test.py gets translated to verilog code.
-```
-python test.py
-```
-
-Verilog code generated from the AST instances is as below:
-
-```verilog
-
-module top
- (
-  input [0:0] CLK, 
-  input [0:0] RST, 
-  output [7:0] led
- );
-  assign led = 8;
-endmodule
-
-```
-
 Example 2 (fsm.v)
 -----------------------------
 Let's try to use pyverilog tools on the verilog module fsm.v (already present in the pyverilog-0.9.1 directory). <br />
@@ -740,6 +532,8 @@ To view the result of dataflow analysis as a picture file, need to run the comma
     python pyverilog/dataflow/graphgen.py -t fsm -s fsm.gnt_0 fsm.v 
 
 out.png file will now be generated which has the definition of 'gnt_0'.
+
+
 ![alt text](https://drive.google.com/uc?id=1YCJZ198a4jnjtMBxkNEB159pFs3HHlhh)
 
 ### Control-flow analyzer
@@ -792,5 +586,216 @@ Loop
 ```
 
 fsm_state.png is also generated which is the graphical representation of the state machine.
+
+
 ![alt text](https://drive.google.com/uc?id=1D9hBez8kQRp5SKjboTjBAuvRO0QNQbah)
+
+
+### Code Generator
+Finally, pyverilog can be used to generate verilog code from the AST representation of RTL. We will be using 'test.py' for demonstrate. <br />
+A Verilog HDL code is represented by using the AST classes defined in 'vparser.ast'.
+Run the below command to see how AST representation in test.py gets translated to verilog code.
+```
+python test.py
+```
+
+Verilog code generated from the AST instances is as below:
+
+```verilog
+
+module top
+ (
+  input [0:0] CLK, 
+  input [0:0] RST, 
+  output [7:0] led
+ );
+  assign led = 8;
+endmodule
+
+```
+
+
+Example 2 (test.v) [Ref: ]
+-----------------------------
+Let's try to use pyverilog tools on the verilog module test.v (already present in the pyverilog-0.9.1 directory)
+This sample design adds the input value internally when the enable signal is asserted. Then it outputs its partial value to the LED.
+
+### Code parser
+Code parser is for syntax analysis. Please type the command as below.
+
+    python pyverilog/vparser/parser.py test.v
+
+The result of syntax analysis is displayed.
+
+```
+Source: 
+  Description: 
+    ModuleDef: top
+      Paramlist: 
+      Portlist: 
+        Ioport: 
+          Input: CLK, False
+            Width: 
+              IntConst: 0
+              IntConst: 0
+        Ioport: 
+          Input: RST, False
+            Width: 
+              IntConst: 0
+              IntConst: 0
+        Ioport: 
+          Input: enable, False
+            Width: 
+              IntConst: 0
+              IntConst: 0
+        Ioport: 
+          Input: value, False
+            Width: 
+              IntConst: 31
+              IntConst: 0
+        Ioport: 
+          Output: led, False
+            Width: 
+              IntConst: 7
+              IntConst: 0
+      Decl: 
+        Reg: count, False
+          Width: 
+            IntConst: 31
+            IntConst: 0
+      Decl: 
+        Reg: state, False
+          Width: 
+            IntConst: 7
+            IntConst: 0
+      Assign: 
+        Lvalue: 
+          Identifier: led
+        Rvalue: 
+          Partselect: 
+            Identifier: count
+            IntConst: 23
+            IntConst: 16
+      Always: 
+        SensList: 
+          Sens: posedge
+            Identifier: CLK
+        Block: None
+          IfStatement: 
+            Identifier: RST
+            Block: None
+              NonblockingSubstitution: 
+                Lvalue: 
+                  Identifier: count
+                Rvalue: 
+                  IntConst: 0
+              NonblockingSubstitution: 
+                Lvalue: 
+                  Identifier: state
+                Rvalue: 
+                  IntConst: 0
+            Block: None
+              IfStatement: 
+                Eq: 
+                  Identifier: state
+                  IntConst: 0
+                Block: None
+                  IfStatement: 
+                    Identifier: enable
+                    NonblockingSubstitution: 
+                      Lvalue: 
+                        Identifier: state
+                      Rvalue: 
+                        IntConst: 1
+                IfStatement: 
+                  Eq: 
+                    Identifier: state
+                    IntConst: 1
+                  Block: None
+                    NonblockingSubstitution: 
+                      Lvalue: 
+                        Identifier: state
+                      Rvalue: 
+                        IntConst: 2
+                  IfStatement: 
+                    Eq: 
+                      Identifier: state
+                      IntConst: 2
+                    Block: None
+                      NonblockingSubstitution: 
+                        Lvalue: 
+                          Identifier: count
+                        Rvalue: 
+                          Plus: 
+                            Identifier: count
+                            Identifier: value
+                      NonblockingSubstitution: 
+                        Lvalue: 
+                          Identifier: state
+                        Rvalue: 
+                          IntConst: 0
+```
+
+### Dataflow analyzer
+Let's try dataflow analysis. It is used to establish the relationship between outputs with inputs and states.
+
+    python pyverilog/dataflow/dataflow_analyzer.py -t top test.v 
+
+The result of each signal definition and each signal assignment are displayed.
+
+```
+Directive:
+Instance:
+(top, 'top')
+Term:
+(Term name:top.led type:{'Output'} msb:(IntConst 7) lsb:(IntConst 0))
+(Term name:top.enable type:{'Input'} msb:(IntConst 0) lsb:(IntConst 0))
+(Term name:top.CLK type:{'Input'} msb:(IntConst 0) lsb:(IntConst 0))
+(Term name:top.count type:{'Reg'} msb:(IntConst 31) lsb:(IntConst 0))
+(Term name:top.state type:{'Reg'} msb:(IntConst 7) lsb:(IntConst 0))
+(Term name:top.RST type:{'Input'} msb:(IntConst 0) lsb:(IntConst 0))
+(Term name:top.value type:{'Input'} msb:(IntConst 31) lsb:(IntConst 0))
+Bind:
+(Bind dest:top.count tree:(Branch Cond:(Terminal top.RST) True:(IntConst 0) False:(Branch Cond:(Operator Eq Next:(Terminal top.state),(IntConst 0)) False:(Branch Cond:(Operator Eq Next:(Terminal top.state),(IntConst 1)) False:(Branch Cond:(Operator Eq Next:(Terminal top.state),(IntConst 2)) True:(Operator Plus Next:(Terminal top.count),(Terminal top.value)))))))
+(Bind dest:top.state tree:(Branch Cond:(Terminal top.RST) True:(IntConst 0) False:(Branch Cond:(Operator Eq Next:(Terminal top.state),(IntConst 0)) True:(Branch Cond:(Terminal top.enable) True:(IntConst 1)) False:(Branch Cond:(Operator Eq Next:(Terminal top.state),(IntConst 1)) True:(IntConst 2) False:(Branch Cond:(Operator Eq Next:(Terminal top.state),(IntConst 2)) True:(IntConst 0))))))
+(Bind dest:top.led tree:(Partselect Var:(Terminal top.count) MSB:(IntConst 23) LSB:(IntConst 16)))
+```
+
+To view the result of dataflow analysis as a picture file, you need to run the command as below (we select output port 'led' (an output port) as the target for example)
+
+    python2.7 pyverilog/dataflow/graphgen.py -t top -s top.led test.v
+(Note that only python2.7 can be used to this command as it internally uses Pygraphviz)    
+
+out.png file will now be generated which has the definition of 'led' is a part-selection of 'count' from 23-bit to 16-bit.
+
+
+![out.png](http://cdn-ak.f.st-hatena.com/images/fotolife/s/sxhxtxa/20140101/20140101045641.png)
+
+### Control-flow analyzer
+Control-flow analysis can be used to picturize how the state diagram of the RTL module looks like.
+
+    python2.7 pyverilog/controlflow/controlflow_analyzer.py -t top test.v 
+(Note that only python2.7 can be used to this command as it internally uses Pygraphviz)
+
+We get the output as below, which shows the state machine structure and transition conditions to the next state in the state machine.
+
+```
+FSM signal: top.count, Condition list length: 4
+FSM signal: top.state, Condition list length: 5
+Condition: (Ulnot, Eq), Inferring transition condition
+Condition: (Eq, top.enable), Inferring transition condition
+Condition: (Ulnot, Ulnot, Eq), Inferring transition condition
+# SIGNAL NAME: top.state
+# DELAY CNT: 0
+0 --(top_enable>'d0)--> 1
+1 --None--> 2
+2 --None--> 0
+Loop
+(0, 1, 2)
+```
+
+top_state.png is also generated which is the graphical representation of the state machine.
+
+
+![top_state.png](http://cdn-ak.f.st-hatena.com/images/fotolife/s/sxhxtxa/20140101/20140101045835.png)
 
