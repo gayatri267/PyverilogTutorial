@@ -175,7 +175,7 @@ Code parser is for syntax analysis. Please type the command as below.
 The result of syntax analysis is displayed.
 
 <pre max-height: 300px>
-<code>
+<code max-height: 300px>
 Source:
   Description:
     ModuleDef: fsm
