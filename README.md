@@ -175,7 +175,8 @@ Code parser is for syntax analysis. Please type the command as below.
 The result of syntax analysis is displayed.
 
 ```
-<pre>overflow-y: auto</pre>
+<pre>overflow-y: scroll
+<code>
 Source:
   Description:
     ModuleDef: fsm
@@ -472,7 +473,7 @@ Source:
                         IntConst: 1'b0
                       DelayStatement:
                         IntConst: 1
-```
+</code></pre>
 
 ### Dataflow analyzer
 Let's try dataflow analysis. It is used to establish the relationship between outputs with inputs and states
