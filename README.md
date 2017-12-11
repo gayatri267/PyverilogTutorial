@@ -802,7 +802,8 @@ top_state.png is also generated which is the graphical representation of the sta
 ![top_state.png](http://cdn-ak.f.st-hatena.com/images/fotolife/s/sxhxtxa/20140101/20140101045835.png)
 
 
-### Reference
+Reference
+----------------
 This tutorial is based on official python documentation for pyverilog - https://pypi.python.org/pypi/pyverilog/0.9.1
 
 
