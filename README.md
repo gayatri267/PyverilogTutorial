@@ -35,8 +35,8 @@ Git Clone Our Tutorial
 Do the following Installations
 ------------------------------------
 If you are using Linux, you can directly follow the instructions. In case you are using Windows, please install Bash for Windows using the link https://www.howtogeek.com/249966/how-to-install-and-use-the-linux-bash-shell-on-windows-10/. It will make the process easier.
-Please make sure you have python2.7 Installed before continuing with this tutorial.
-Some of the commands in this tutorial can only be run using Python 2.7, while others can be run using Python 2.7 or Python 3
+
+Please make sure you have python2.7 installed before continuing with this tutorial. Some of the commands in this tutorial can only be run using Python 2.7, while others can be run using Python 2.7 or Python 3
 (We will specify during the commands if python2.7 is to be explicitly used)
 
 1. Go into the pyverilog-0.9.1 directory in the cloned repository
@@ -57,6 +57,7 @@ Some of the commands in this tutorial can only be run using Python 2.7, while ot
     sudo apt install python-pip
     pip install jinja2
     ```
+    
 5. Install the pyverilog library using setup.py.
     * If Python 2.7 is used,
     ```
@@ -67,16 +68,15 @@ Some of the commands in this tutorial can only be run using Python 2.7, while ot
     ```
     sudo python3 setup.py install
     ```
-    
 
     
 Example 1 (test.v)
 -----------------------------
-Let's try to use pyverilog tools on the verilog module test.v(already present in the pyverilog-0.9.1 directory)
-This sample design adds the input value internally whtn the enable signal is asserted. Then it outputs its partial value to the LED.
+Let's try to use pyverilog tools on the verilog module test.v (already present in the pyverilog-0.9.1 directory)
+This sample design adds the input value internally when the enable signal is asserted. Then it outputs its partial value to the LED.
 
 ### Code parser
-Code parer is the syntax analysis. Please type the command as below.
+Code parer is for syntax analysis. Please type the command as below.
 
     python pyverilog/vparser/parser.py test.v
 
@@ -192,7 +192,7 @@ Source:
 ```
 
 ### Dataflow analyzer
-Let's try dataflow analysis. It is used to establish the relationship between outputs with inputs and states
+Let's try dataflow analysis. It is used to establish the relationship between outputs with inputs and states.
 
     python3 pyverilog/dataflow/dataflow_analyzer.py -t top test.v 
 
@@ -216,16 +216,17 @@ Bind:
 (Bind dest:top.led tree:(Partselect Var:(Terminal top.count) MSB:(IntConst 23) LSB:(IntConst 16)))
 ```
 
-To view the result of dataflow analysis as a picture file, need to run the command as below (we select output port 'led' as the target for example)
+To view the result of dataflow analysis as a picture file, you need to run the command as below (we select output port 'led' (an output port) as the target for example)
 
     python pyverilog/dataflow/graphgen.py -t top -s top.led test.v 
 
 out.png file will now be generated which has the definition of 'led' is a part-selection of 'count' from 23-bit to 16-bit.
 
+
 ![out.png](http://cdn-ak.f.st-hatena.com/images/fotolife/s/sxhxtxa/20140101/20140101045641.png)
 
 ### Control-flow analyzer
-Control-flow analysis can be used to picturize how the state diagram of the RTL module look like
+Control-flow analysis can be used to picturize how the state diagram of the RTL module looks like.
 
     python2.7 pyverilog/controlflow/controlflow_analyzer.py -t top test.v 
 (Note that only python2.7 can be used to this command as it internally uses Pygraphviz)
@@ -249,12 +250,13 @@ Loop
 
 top_state.png is also generated which is the graphical representation of the state machine.
 
+
 ![top_state.png](http://cdn-ak.f.st-hatena.com/images/fotolife/s/sxhxtxa/20140101/20140101045835.png)
 
 ### Code Generator
-Finally, pyverilog can be used to generate verilog code from the AST representation of RTL. We will be using 'test.py' for demonstrate
+Finally, pyverilog can be used to generate verilog code from the AST representation of RTL. We will be using 'test.py' for demonstrate.
 A Verilog HDL code is represented by using the AST classes defined in 'vparser.ast'.
-Run the below command to see how AST representation in test.py gets translated to verilog code
+Run the below command to see how AST representation in test.py gets translated to verilog code.
 ```
 python test.py
 ```
@@ -277,9 +279,102 @@ endmodule
 
 Example 2 (fsm.v)
 -----------------------------
-Let's try to use pyverilog tools on the verilog module fsm.v(already present in the pyverilog-0.9.1 directory)
+Let's try to use pyverilog tools on the verilog module fsm.v (already present in the pyverilog-0.9.1 directory). <br />
+fsm.v is a priority arbiter which takes two requests req_0 and req_1(req_0 is of higher priority) and generates two outputs gnt_0 and gnt_1
 
 
+The verilog code for priority arbiter is as follows
+
+```verilog
+module fsm (
+clock      , // clock
+reset      , // Active high, syn reset
+req_0      , // Request 0
+req_1      , // Request 1
+gnt_0      , // Grant 0
+gnt_1      
+);
+//-------------Input Ports-----------------------------
+input   clock,reset,req_0,req_1;
+ //-------------Output Ports----------------------------
+output  gnt_0,gnt_1;
+//-------------Input ports Data Type-------------------
+wire    clock,reset,req_0,req_1;
+//-------------Output Ports Data Type------------------
+reg     gnt_0,gnt_1;
+//-------------Internal Constants--------------------------
+parameter SIZE = 3           ;
+parameter IDLE  = 3'b001,GNT0 = 3'b010,GNT1 = 3'b100 ;
+//-------------Internal Variables---------------------------
+reg   [SIZE-1:0]          state        ;// Seq part of the FSM
+reg   [SIZE-1:0]          next_state   ;// combo part of FSM
+//----------Code startes Here------------------------
+always @ (state or req_0 or req_1)
+begin : FSM_COMBO
+ next_state = 3'b000;
+ case(state)
+   IDLE : if (req_0 == 1'b1) begin
+                next_state = GNT0;
+              end else if (req_1 == 1'b1) begin
+                next_state= GNT1;
+              end else begin
+                next_state = IDLE;
+              end
+   GNT0 : if (req_0 == 1'b1) begin
+                next_state = GNT0;
+              end else begin
+                next_state = IDLE;
+              end
+   GNT1 : if (req_1 == 1'b1) begin
+                next_state = GNT1;
+              end else begin
+                next_state = IDLE;
+              end
+   default : next_state = IDLE;
+  endcase
+end
+//----------Seq Logic-----------------------------
+always @ (posedge clock)
+begin : FSM_SEQ
+  if (reset == 1'b1) begin
+    state <=  #1  IDLE;
+  end else begin
+    state <=  #1  next_state;
+  end
+end
+//----------Output Logic-----------------------------
+always @ (posedge clock)
+begin : OUTPUT_LOGIC
+if (reset == 1'b1) begin
+  gnt_0 <=  #1  1'b0;
+  gnt_1 <=  #1  1'b0;
+end
+else begin
+  case(state)
+    IDLE : begin
+                  gnt_0 <=  #1  1'b0;
+                  gnt_1 <=  #1  1'b0;
+               end
+   GNT0 : begin
+                   gnt_0 <=  #1  1'b1;
+                   gnt_1 <=  #1  1'b0;
+                end
+   GNT1 : begin
+                   gnt_0 <=  #1  1'b0;
+                   gnt_1 <=  #1  1'b1;
+                end
+   default : begin
+                    gnt_0 <=  #1  1'b0;
+                    gnt_1 <=  #1  1'b0;
+                  end
+  endcase
+end
+end // End Of Block OUTPUT_LOGIC
+
+endmodule // End of Module arbiter
+
+```
+ 
 ### Code parser
 Code parer is the syntax analysis. Please type the command as below.
 
@@ -290,7 +385,7 @@ The result of syntax analysis is displayed.
 ```
 Source:
   Description:
-    ModuleDef: fsm2
+    ModuleDef: fsm
       Paramlist:
       Portlist:
         Port: clock, None
@@ -596,47 +691,47 @@ The result of each signal definition and each signal assignment are displayed.
 ```
 Directive:
 Instance:
-(fsm2, 'fsm2')
+(fsm, 'fsm')
 Term:
-(Term name:fsm2.next_state type:{'Reg'} msb:(Operator Minus Next:(Terminal fsm2.SIZE),(IntConst 1)) lsb:(IntConst 0))
-(Term name:fsm2._rn0_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm2.SIZE),(IntConst 1)) lsb:(IntConst 0))
-(Term name:fsm2.gnt_0 type:{'Reg', 'Output'} msb:(IntConst 0) lsb:(IntConst 0))
-(Term name:fsm2._rn2_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm2.SIZE),(IntConst 1)) lsb:(IntConst 0))
-(Term name:fsm2._rn3_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm2.SIZE),(IntConst 1)) lsb:(IntConst 0))
-(Term name:fsm2._rn6_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm2.SIZE),(IntConst 1)) lsb:(IntConst 0))
-(Term name:fsm2.req_0 type:{'Input', 'Wire'} msb:(IntConst 0) lsb:(IntConst 0))
-(Term name:fsm2.req_1 type:{'Input', 'Wire'} msb:(IntConst 0) lsb:(IntConst 0))
-(Term name:fsm2.IDLE type:{'Parameter'} msb:'d31 lsb:'d0)
-(Term name:fsm2.GNT0 type:{'Parameter'} msb:'d31 lsb:'d0)
-(Term name:fsm2.SIZE type:{'Parameter'} msb:'d31 lsb:'d0)
-(Term name:fsm2._rn1_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm2.SIZE),(IntConst 1)) lsb:(IntConst 0))
-(Term name:fsm2.clock type:{'Input', 'Wire'} msb:(IntConst 0) lsb:(IntConst 0))
-(Term name:fsm2.reset type:{'Input', 'Wire'} msb:(IntConst 0) lsb:(IntConst 0))
-(Term name:fsm2._rn8_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm2.SIZE),(IntConst 1)) lsb:(IntConst 0))
-(Term name:fsm2.gnt_1 type:{'Reg', 'Output'} msb:(IntConst 0) lsb:(IntConst 0))
-(Term name:fsm2._rn5_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm2.SIZE),(IntConst 1)) lsb:(IntConst 0))
-(Term name:fsm2.GNT1 type:{'Parameter'} msb:'d31 lsb:'d0)
-(Term name:fsm2._rn4_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm2.SIZE),(IntConst 1)) lsb:(IntConst 0))
-(Term name:fsm2._rn7_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm2.SIZE),(IntConst 1)) lsb:(IntConst 0))
-(Term name:fsm2.state type:{'Reg'} msb:(Operator Minus Next:(Terminal fsm2.SIZE),(IntConst 1)) lsb:(IntConst 0))
+(Term name:fsm.next_state type:{'Reg'} msb:(Operator Minus Next:(Terminal fsm.SIZE),(IntConst 1)) lsb:(IntConst 0))
+(Term name:fsm._rn0_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm.SIZE),(IntConst 1)) lsb:(IntConst 0))
+(Term name:fsm.gnt_0 type:{'Reg', 'Output'} msb:(IntConst 0) lsb:(IntConst 0))
+(Term name:fsm._rn2_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm.SIZE),(IntConst 1)) lsb:(IntConst 0))
+(Term name:fsm._rn3_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm.SIZE),(IntConst 1)) lsb:(IntConst 0))
+(Term name:fsm._rn6_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm.SIZE),(IntConst 1)) lsb:(IntConst 0))
+(Term name:fsm.req_0 type:{'Input', 'Wire'} msb:(IntConst 0) lsb:(IntConst 0))
+(Term name:fsm.req_1 type:{'Input', 'Wire'} msb:(IntConst 0) lsb:(IntConst 0))
+(Term name:fsm.IDLE type:{'Parameter'} msb:'d31 lsb:'d0)
+(Term name:fsm.GNT0 type:{'Parameter'} msb:'d31 lsb:'d0)
+(Term name:fsm.SIZE type:{'Parameter'} msb:'d31 lsb:'d0)
+(Term name:fsm._rn1_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm.SIZE),(IntConst 1)) lsb:(IntConst 0))
+(Term name:fsm.clock type:{'Input', 'Wire'} msb:(IntConst 0) lsb:(IntConst 0))
+(Term name:fsm.reset type:{'Input', 'Wire'} msb:(IntConst 0) lsb:(IntConst 0))
+(Term name:fsm._rn8_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm.SIZE),(IntConst 1)) lsb:(IntConst 0))
+(Term name:fsm.gnt_1 type:{'Reg', 'Output'} msb:(IntConst 0) lsb:(IntConst 0))
+(Term name:fsm._rn5_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm.SIZE),(IntConst 1)) lsb:(IntConst 0))
+(Term name:fsm.GNT1 type:{'Parameter'} msb:'d31 lsb:'d0)
+(Term name:fsm._rn4_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm.SIZE),(IntConst 1)) lsb:(IntConst 0))
+(Term name:fsm._rn7_next_state type:{'Rename'} msb:(Operator Minus Next:(Terminal fsm.SIZE),(IntConst 1)) lsb:(IntConst 0))
+(Term name:fsm.state type:{'Reg'} msb:(Operator Minus Next:(Terminal fsm.SIZE),(IntConst 1)) lsb:(IntConst 0))
 Bind:
-(Bind dest:fsm2.next_state tree:(Branch Cond:(Operator Eq Next:(Terminal fsm2.state),(Terminal fsm2.IDLE)) True:(Branch Cond:(Operator Eq Next:(Terminal fsm2.req_0),(IntConst 1'b1)) True:(Terminal fsm2._rn1_next_state) False:(Branch Cond:(Operator Eq Next:(Terminal fsm2.req_1),(IntConst 1'b1)) True:(Terminal fsm2._rn2_next_state) False:(Terminal fsm2._rn3_next_state))) False:(Branch Cond:(Operator Eq Next:(Terminal fsm2.state),(Terminal fsm2.GNT0)) True:(Branch Cond:(Operator Eq Next:(Terminal fsm2.req_0),(IntConst 1'b1)) True:(Terminal fsm2._rn4_next_state) False:(Terminal fsm2._rn5_next_state)) False:(Branch Cond:(Operator Eq Next:(Terminal fsm2.state),(Terminal fsm2.GNT1)) True:(Branch Cond:(Operator Eq Next:(Terminal fsm2.req_1),(IntConst 1'b1)) True:(Terminal fsm2._rn6_next_state) False:(Terminal fsm2._rn7_next_state)) False:(Branch Cond:(IntConst 1) True:(Terminal fsm2._rn8_next_state))))))
-(Bind dest:fsm2._rn0_next_state tree:(IntConst 3'b000))
-(Bind dest:fsm2.gnt_0 tree:(Branch Cond:(Operator Eq Next:(Terminal fsm2.reset),(IntConst 1'b1)) True:(IntConst 1'b0) False:(Branch Cond:(Operator Eq Next:(Terminal fsm2.state),(Terminal fsm2.IDLE)) True:(IntConst 1'b0) False:(Branch Cond:(Operator Eq Next:(Terminal fsm2.state),(Terminal fsm2.GNT0)) True:(IntConst 1'b1) False:(Branch Cond:(Operator Eq Next:(Terminal fsm2.state),(Terminal fsm2.GNT1)) True:(IntConst 1'b0) False:(Branch Cond:(IntConst 1) True:(IntConst 1'b0)))))))
-(Bind dest:fsm2._rn2_next_state tree:(Terminal fsm2.GNT1))
-(Bind dest:fsm2._rn3_next_state tree:(Terminal fsm2.IDLE))
-(Bind dest:fsm2.state tree:(Branch Cond:(Operator Eq Next:(Terminal fsm2.reset),(IntConst 1'b1)) True:(Terminal fsm2.IDLE) False:(Terminal fsm2.next_state)))
-(Bind dest:fsm2._rn6_next_state tree:(Terminal fsm2.GNT1))
-(Bind dest:fsm2.IDLE tree:(IntConst 3'b001))
-(Bind dest:fsm2.GNT0 tree:(IntConst 3'b010))
-(Bind dest:fsm2.SIZE tree:(IntConst 3))
-(Bind dest:fsm2._rn1_next_state tree:(Terminal fsm2.GNT0))
-(Bind dest:fsm2._rn8_next_state tree:(Terminal fsm2.IDLE))
-(Bind dest:fsm2.gnt_1 tree:(Branch Cond:(Operator Eq Next:(Terminal fsm2.reset),(IntConst 1'b1)) True:(IntConst 1'b0) False:(Branch Cond:(Operator Eq Next:(Terminal fsm2.state),(Terminal fsm2.IDLE)) True:(IntConst 1'b0) False:(Branch Cond:(Operator Eq Next:(Terminal fsm2.state),(Terminal fsm2.GNT0)) True:(IntConst 1'b0) False:(Branch Cond:(Operator Eq Next:(Terminal fsm2.state),(Terminal fsm2.GNT1)) True:(IntConst 1'b1) False:(Branch Cond:(IntConst 1) True:(IntConst 1'b0)))))))
-(Bind dest:fsm2.GNT1 tree:(IntConst 3'b100))
-(Bind dest:fsm2._rn4_next_state tree:(Terminal fsm2.GNT0))
-(Bind dest:fsm2._rn7_next_state tree:(Terminal fsm2.IDLE))
-(Bind dest:fsm2._rn5_next_state tree:(Terminal fsm2.IDLE))
+(Bind dest:fsm.next_state tree:(Branch Cond:(Operator Eq Next:(Terminal fsm.state),(Terminal fsm.IDLE)) True:(Branch Cond:(Operator Eq Next:(Terminal fsm.req_0),(IntConst 1'b1)) True:(Terminal fsm._rn1_next_state) False:(Branch Cond:(Operator Eq Next:(Terminal fsm.req_1),(IntConst 1'b1)) True:(Terminal fsm._rn2_next_state) False:(Terminal fsm._rn3_next_state))) False:(Branch Cond:(Operator Eq Next:(Terminal fsm.state),(Terminal fsm.GNT0)) True:(Branch Cond:(Operator Eq Next:(Terminal fsm.req_0),(IntConst 1'b1)) True:(Terminal fsm._rn4_next_state) False:(Terminal fsm._rn5_next_state)) False:(Branch Cond:(Operator Eq Next:(Terminal fsm.state),(Terminal fsm.GNT1)) True:(Branch Cond:(Operator Eq Next:(Terminal fsm.req_1),(IntConst 1'b1)) True:(Terminal fsm._rn6_next_state) False:(Terminal fsm._rn7_next_state)) False:(Branch Cond:(IntConst 1) True:(Terminal fsm._rn8_next_state))))))
+(Bind dest:fsm._rn0_next_state tree:(IntConst 3'b000))
+(Bind dest:fsm.gnt_0 tree:(Branch Cond:(Operator Eq Next:(Terminal fsm.reset),(IntConst 1'b1)) True:(IntConst 1'b0) False:(Branch Cond:(Operator Eq Next:(Terminal fsm.state),(Terminal fsm.IDLE)) True:(IntConst 1'b0) False:(Branch Cond:(Operator Eq Next:(Terminal fsm.state),(Terminal fsm.GNT0)) True:(IntConst 1'b1) False:(Branch Cond:(Operator Eq Next:(Terminal fsm.state),(Terminal fsm.GNT1)) True:(IntConst 1'b0) False:(Branch Cond:(IntConst 1) True:(IntConst 1'b0)))))))
+(Bind dest:fsm._rn2_next_state tree:(Terminal fsm.GNT1))
+(Bind dest:fsm._rn3_next_state tree:(Terminal fsm.IDLE))
+(Bind dest:fsm.state tree:(Branch Cond:(Operator Eq Next:(Terminal fsm.reset),(IntConst 1'b1)) True:(Terminal fsm.IDLE) False:(Terminal fsm.next_state)))
+(Bind dest:fsm._rn6_next_state tree:(Terminal fsm.GNT1))
+(Bind dest:fsm.IDLE tree:(IntConst 3'b001))
+(Bind dest:fsm.GNT0 tree:(IntConst 3'b010))
+(Bind dest:fsm.SIZE tree:(IntConst 3))
+(Bind dest:fsm._rn1_next_state tree:(Terminal fsm.GNT0))
+(Bind dest:fsm._rn8_next_state tree:(Terminal fsm.IDLE))
+(Bind dest:fsm.gnt_1 tree:(Branch Cond:(Operator Eq Next:(Terminal fsm.reset),(IntConst 1'b1)) True:(IntConst 1'b0) False:(Branch Cond:(Operator Eq Next:(Terminal fsm.state),(Terminal fsm.IDLE)) True:(IntConst 1'b0) False:(Branch Cond:(Operator Eq Next:(Terminal fsm.state),(Terminal fsm.GNT0)) True:(IntConst 1'b0) False:(Branch Cond:(Operator Eq Next:(Terminal fsm.state),(Terminal fsm.GNT1)) True:(IntConst 1'b1) False:(Branch Cond:(IntConst 1) True:(IntConst 1'b0)))))))
+(Bind dest:fsm.GNT1 tree:(IntConst 3'b100))
+(Bind dest:fsm._rn4_next_state tree:(Terminal fsm.GNT0))
+(Bind dest:fsm._rn7_next_state tree:(Terminal fsm.IDLE))
+(Bind dest:fsm._rn5_next_state tree:(Terminal fsm.IDLE))
 ```
 
 To view the result of dataflow analysis as a picture file, need to run the command as below (we select output port 'fsm.gnt_0' as the target for example)
@@ -655,16 +750,16 @@ Control-flow analysis can be used to picturize how the state diagram of the RTL 
 We get the output as below, which shows the state machine structure and transition conditions to the next state in the state machine.
 
 ```
-FSM signal: fsm2.gnt_1, Condition list length: 4
+FSM signal: fsm.gnt_1, Condition list length: 4
 Condition: (Eq,), Inferring transition condition
 Condition: (Ulnot, Eq), Inferring transition condition
 Condition: (Ulnot, Ulnot, Eq), Inferring transition condition
 Condition: (Ulnot, Ulnot, Ulnot), Inferring transition condition
-FSM signal: fsm2.gnt_0, Condition list length: 3
+FSM signal: fsm.gnt_0, Condition list length: 3
 Condition: (Eq,), Inferring transition condition
 Condition: (Ulnot, Eq), Inferring transition condition
 Condition: (Ulnot, Ulnot), Inferring transition condition
-FSM signal: fsm2.state, Condition list length: 8
+FSM signal: fsm.state, Condition list length: 8
 Condition: (Eq, Eq), Inferring transition condition
 Condition: (Eq, Ulnot, Ulnot), Inferring transition condition
 Condition: (Ulnot, Eq, Eq), Inferring transition condition
@@ -673,17 +768,17 @@ Condition: (Eq, Ulnot, Eq), Inferring transition condition
 Condition: (Ulnot, Eq, Ulnot), Inferring transition condition
 Condition: (Ulnot, Ulnot, Eq, Ulnot), Inferring transition condition
 Condition: (Ulnot, Ulnot, Eq, Eq), Inferring transition condition
-# SIGNAL NAME: fsm2.state
+# SIGNAL NAME: fsm.state
 # DELAY CNT: 0
 0 --None--> 1
-1 --((!(fsm2_req_0==1'd1))&&(!(fsm2_req_1==1'd1)))--> 1
-1 --(fsm2_req_0==1'd1)--> 2
-1 --((!(fsm2_req_0==1'd1))&&(fsm2_req_1==1'd1))--> 4
-2 --(fsm2_req_0==1'd1)--> 2
-2 --(!(fsm2_req_0==1'd1))--> 1
+1 --((!(fsm_req_0==1'd1))&&(!(fsm_req_1==1'd1)))--> 1
+1 --(fsm_req_0==1'd1)--> 2
+1 --((!(fsm_req_0==1'd1))&&(fsm_req_1==1'd1))--> 4
+2 --(fsm_req_0==1'd1)--> 2
+2 --(!(fsm_req_0==1'd1))--> 1
 3 --None--> 1
-4 --(!(fsm2_req_1==1'd1))--> 1
-4 --(fsm2_req_1==1'd1)--> 4
+4 --(!(fsm_req_1==1'd1))--> 1
+4 --(fsm_req_1==1'd1)--> 4
 5 --None--> 1
 6 --None--> 1
 7 --None--> 1
