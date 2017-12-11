@@ -476,8 +476,7 @@ Source:
 ### Dataflow analyzer
 Let's try dataflow analysis. It is used to establish the relationship between outputs with inputs and states
 
-    python2.7 pyverilog/dataflow/dataflow_analyzer.py -t fsm fsm.v
-(Note that only python2.7 can be used to this command as it internally uses Pygraphviz)    
+    python pyverilog/dataflow/dataflow_analyzer.py -t fsm fsm.v 
 
 The result of each signal definition and each signal assignment are displayed.
 
@@ -529,7 +528,8 @@ Bind:
 
 To view the result of dataflow analysis as a picture file, need to run the command as below (we select output port 'fsm.gnt_0' as the target for example)
 
-    python pyverilog/dataflow/graphgen.py -t fsm -s fsm.gnt_0 fsm.v 
+    python2.7 pyverilog/dataflow/graphgen.py -t fsm -s fsm.gnt_0 fsm.v
+(Note that only python2.7 can be used to this command as it internally uses Pygraphviz)
 
 out.png file will now be generated which has the definition of 'gnt_0'.
 
@@ -540,7 +540,7 @@ out.png file will now be generated which has the definition of 'gnt_0'.
 ### Control-flow analyzer
 Control-flow analysis can be used to picturize how the state diagram of the RTL module look like
 
-    python pyverilog/controlflow/controlflow_analyzer.py -t fsm fsm.v 
+    python2.7 pyverilog/controlflow/controlflow_analyzer.py -t fsm fsm.v 
 (Note that only python2.7 can be used to this command as it internally uses Pygraphviz)
 
 We get the output as below, which shows the state machine structure and transition conditions to the next state in the state machine.
