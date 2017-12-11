@@ -69,7 +69,7 @@ Please make sure you have python2.7 installed before continuing with this tutori
     sudo python3 setup.py install
     ```
 
-Example 2 (fsm.v)
+Example 1 (fsm.v)
 -----------------------------
 Let's try to use pyverilog tools on the verilog module fsm.v (already present in the pyverilog-0.9.1 directory). <br />
 fsm.v is a priority arbiter which takes two requests req_0 and req_1(req_0 is of higher priority) and generates two outputs gnt_0 and gnt_1
@@ -536,6 +536,7 @@ out.png file will now be generated which has the definition of 'gnt_0'.
 
 ![alt text](https://drive.google.com/uc?id=1YCJZ198a4jnjtMBxkNEB159pFs3HHlhh)
 
+
 ### Control-flow analyzer
 Control-flow analysis can be used to picturize how the state diagram of the RTL module look like
 
@@ -615,7 +616,7 @@ endmodule
 ```
 
 
-Example 2 (test.v) [Ref: ]
+Example 2 (test.v)
 -----------------------------
 Let's try to use pyverilog tools on the verilog module test.v (already present in the pyverilog-0.9.1 directory)
 This sample design adds the input value internally when the enable signal is asserted. Then it outputs its partial value to the LED.
@@ -771,6 +772,7 @@ out.png file will now be generated which has the definition of 'led' is a part-s
 
 ![out.png](http://cdn-ak.f.st-hatena.com/images/fotolife/s/sxhxtxa/20140101/20140101045641.png)
 
+
 ### Control-flow analyzer
 Control-flow analysis can be used to picturize how the state diagram of the RTL module looks like.
 
@@ -798,4 +800,10 @@ top_state.png is also generated which is the graphical representation of the sta
 
 
 ![top_state.png](http://cdn-ak.f.st-hatena.com/images/fotolife/s/sxhxtxa/20140101/20140101045835.png)
+
+
+### Reference
+This tutorial is based on "Official python Documentation for pyverilog" - https://pypi.python.org/pypi/pyverilog/0.9.1
+
+
 
