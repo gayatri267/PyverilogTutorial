@@ -534,7 +534,7 @@ To view the result of dataflow analysis as a picture file, need to run the comma
 out.png file will now be generated which has the definition of 'gnt_0'.
 
 
-![alt text](https://drive.google.com/uc?id=1YCJZ198a4jnjtMBxkNEB159pFs3HHlhh)
+![alt text](https://drive.google.com/drive/u/0/folders/0BwcLrCxGSS_FWGs0eU9wRnhQUEk)
 
 
 ### Control-flow analyzer
@@ -600,7 +600,7 @@ Run the below command to see how AST representation in test.py gets translated t
 python test.py
 ```
 
-Verilog code generated from the AST instances is as below:
+Verilog code generated from the AST instance is as below:
 
 ```verilog
 
