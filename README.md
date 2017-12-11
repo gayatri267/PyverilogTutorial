@@ -174,7 +174,7 @@ Code parser is for syntax analysis. Please type the command as below.
 
 The result of syntax analysis is displayed.
 
-<pre overflow-y: scroll>
+<pre overflow-y:scroll  >
 <code>
 Source:
   Description:
