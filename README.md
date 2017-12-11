@@ -47,7 +47,7 @@ Please make sure you have python2.7 installed before continuing with this tutori
     sudo apt-get install iverilog
     ```
     
-3. Install Pygraphviz as below (Note that Python3 does not support Pygraphviz and hence only Python2.7 is to be installed)
+3. Install Pygraphviz as below (Note that Python3 does not support Pygraphviz and hence only Python2.7 version is to be installed)
     ```
     sudo apt-get install -y python-pygraphviz
     ```
@@ -76,7 +76,7 @@ Let's try to use pyverilog tools on the verilog module test.v (already present i
 This sample design adds the input value internally when the enable signal is asserted. Then it outputs its partial value to the LED.
 
 ### Code parser
-Code parer is for syntax analysis. Please type the command as below.
+Code parser is for syntax analysis. Please type the command as below.
 
     python pyverilog/vparser/parser.py test.v
 
@@ -194,7 +194,7 @@ Source:
 ### Dataflow analyzer
 Let's try dataflow analysis. It is used to establish the relationship between outputs with inputs and states.
 
-    python3 pyverilog/dataflow/dataflow_analyzer.py -t top test.v 
+    python pyverilog/dataflow/dataflow_analyzer.py -t top test.v 
 
 The result of each signal definition and each signal assignment are displayed.
 
@@ -218,7 +218,8 @@ Bind:
 
 To view the result of dataflow analysis as a picture file, you need to run the command as below (we select output port 'led' (an output port) as the target for example)
 
-    python pyverilog/dataflow/graphgen.py -t top -s top.led test.v 
+    python2.7 pyverilog/dataflow/graphgen.py -t top -s top.led test.v
+(Note that only python2.7 can be used to this command as it internally uses Pygraphviz)    
 
 out.png file will now be generated which has the definition of 'led' is a part-selection of 'count' from 23-bit to 16-bit.
 
@@ -254,7 +255,7 @@ top_state.png is also generated which is the graphical representation of the sta
 ![top_state.png](http://cdn-ak.f.st-hatena.com/images/fotolife/s/sxhxtxa/20140101/20140101045835.png)
 
 ### Code Generator
-Finally, pyverilog can be used to generate verilog code from the AST representation of RTL. We will be using 'test.py' for demonstrate.
+Finally, pyverilog can be used to generate verilog code from the AST representation of RTL. We will be using 'test.py' for demonstrate. <br />
 A Verilog HDL code is represented by using the AST classes defined in 'vparser.ast'.
 Run the below command to see how AST representation in test.py gets translated to verilog code.
 ```
@@ -268,9 +269,8 @@ Verilog code generated from the AST instances is as below:
 module top
  (
   input [0:0] CLK, 
-input [0:0] RST, 
-output [7:0] led
-
+  input [0:0] RST, 
+  output [7:0] led
  );
   assign led = 8;
 endmodule
@@ -376,7 +376,7 @@ endmodule // End of Module arbiter
 ```
  
 ### Code parser
-Code parer is the syntax analysis. Please type the command as below.
+Code parser is for syntax analysis. Please type the command as below.
 
     python pyverilog/vparser/parser.py fsm.v
 
@@ -684,7 +684,8 @@ Source:
 ### Dataflow analyzer
 Let's try dataflow analysis. It is used to establish the relationship between outputs with inputs and states
 
-    python3 pyverilog/dataflow/dataflow_analyzer.py -t fsm fsm.v 
+    python2.7 pyverilog/dataflow/dataflow_analyzer.py -t fsm fsm.v
+(Note that only python2.7 can be used to this command as it internally uses Pygraphviz)    
 
 The result of each signal definition and each signal assignment are displayed.
 
