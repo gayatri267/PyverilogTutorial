@@ -1,0 +1,135 @@
+---
+title: "MAII_A1_Gihani_Dissanayake"
+author: "Gihani Dissanayake"
+date: "February 6, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Linear Regression Analysis
+
+First we read in and view the data.
+```{r}
+library(readr)
+walmart = read_csv("~/Walmart_Data.csv")
+head(walmart)
+```
+
+##Part 1
+```{r}
+walmart$logSales = log(walmart$Sales)
+str(walmart)
+summary(walmart)
+```
+
+
+##Part 2
+```{r}
+cor(walmart[2:4])
+```
+
+```{r}
+par(mfrow = c(1,2))
+plot(walmart$Sales, walmart$Promotion)
+plot(walmart$Sales, walmart$Feature)
+```
+The scatter plots above and the correlations from earlier confirm the positive relationship between sales and promotion, as well as sales and feature. However, the correlation is fairly weak, with both correlation values being less than 0.4. The correlation between sales and promotion is a little stronger than the correlation between sales and feature.   
+
+```{r}
+par(mfrow = c(1,2))
+hist(walmart$Sales, nclass = 20)
+hist(walmart$logSales, nclass = 20)
+```
+As shown in the histograms above, the logSales histogram looks much more like a normal distribution than the Sales histograpm. This is because the sales histogram is a little more skewed to the right than the logSales distribution.
+
+##Part 3
+```{r}
+lm1 = lm(logSales ~ Promotion+Feature+Walmart+Holiday, walmart)
+summary(lm1)
+```
+The coeffecients of the four variables, promotion, feature, walmart, and holiday are all significant, as indicated by their low p-values and the asterisks next to the variable rows. Though promotion, feature, and holiday have a positive coeffcient, walmart has a negative coeffecient. This means that the entry of 1 new walmart is expected to have a -0.3 impact on logSales. This affirms the idea that a new walmart has a negative effect on the sales of the local store.
+
+Conversely, when there is a promotion, feature, and/or holiday, the logSales and therefore actual sales of the local store are expected to increase. Since promotion and feature have a stronger positive weight than the negative effect of the new walmart, the local store should better utilize them to compete with walmart. 
+
+```{r}
+par(mfrow =c(2,2))
+plot(lm1)
+```
+
+
+##Part 4
+```{r}
+lm2 = lm(logSales ~ Promotion+Feature+Walmart+Holiday+Holiday*Walmart+Holiday*Promotion, walmart)
+summary(lm2)
+```
+Unlike the first linear model in which all variables were significant, in this regression, only the promotion, feature, and walmart variables are significant. The interaction terms as well as the holiday variable are not significant predictors of logSales. The coeffecients of the significant variables (promotion, feature, and walmart) are fairly similar to those of the first model. To compare the two, we look to the adjusted R^2, AIC and BIC below.
+
+```{r}
+par(mfrow =c(2,2))
+plot(lm1)
+```
+
+
+
+```{r}
+r1 = summary(lm1)$adj.r.squared
+r2 = summary(lm2)$adj.r.squared
+
+paste('The adjusted R^2 scores for lm1 and lm2 are:', r1, 'and', r2)
+paste('The AIC scores for lm1 and lm2 are:', AIC(lm1), 'and', AIC(lm2))
+paste('The BIC scores for lm1 and lm2 are:', BIC(lm1), 'and', BIC(lm2))
+```
+All three methods of comparison (adjusted R^2, AIC, and BIC) indicate that the first model is superior to the second. Because R^2 value is only slightly higher in the first model, the AIC and BIC are more conclusive towards preferncing the first model. AIC and BIC indicate that less information is lost with the first model than the second.
+
+```{r}
+lm3 = step(lm2, scale = 0, direction = 'backward')
+summary(lm3)
+```
+Here we use backward regression on lm2 to find the best model. Interestingly, the best model is what we set as lm1. Scale = 0 is the default, but thought it was worth showing because it indicates AIC()
+
+
+
+
+#Random Effects and Hierarchical Linear Models
+
+##Part 1
+```{r}
+library(readr)
+sow.data = read_csv("~/CreditCard_SOW_Data.csv")
+head(sow.data)
+```
+
+```{r}
+sow.data$ConsumerID = as.factor(sow.data$ConsumerID)
+sow.data$logIncome = log(sow.data$Income)
+sow.data$logSowRatio = log(sow.data$WalletShare/(1-sow.data$WalletShare))
+head(sow.data)
+```
+
+##Part 2
+```{r}
+lm4 = lm(logSowRatio ~ History+Balance+Promotion+History*Promotion+logIncome*Promotion, data = sow.data)
+summary(lm4)
+```
+As shown above, the adjusted R^2 is quite high, and there are three significant variables: history, balance, and the interaction variable between history and promotion.
+
+##Part 3
+```{r}
+library("lme4")
+hlm1 = lmer(logSowRatio ~ History + Balance + Promotion*History + Promotion*logIncome + (1+Promotion|ConsumerID), data = sow.data, REML=F, control=lmerControl(optimizer ="Nelder_Mead"))
+
+summary(hlm1)
+```
+The fixed effects are for history, balance, promotion, logIncome, and the interaction terms between history&promotion and promotion&logIncome. 
+
+Fixed effects in an HLM model work like coefficients in a linear model, in which increasing increasing history by one unit results in approximately a 1.037e-02 increase in the y, logSowRatio.This proportional increase is viewed in the estimate column, with the negative values representing an inverse relationship between that fixed effect and logSowRatio
+
+
+```{r}
+paste('The AIC scores for lm1 and lm2 are:', AIC(lm4), 'and', AIC(hlm1))
+paste('The BIC scores for lm1 and lm2 are:', BIC(lm4), 'and', BIC(hlm1))
+```
+Here we compare the original linear model (all fixed effects) with the he=ierarchical linear model with mixed effects (both random and fixed effects). In the HLM model, the intercept and promotion are random variables. To compare the models, we look AIC and BIC, both of which strongly favor the HLM model as shown by the exponentially lower values.
