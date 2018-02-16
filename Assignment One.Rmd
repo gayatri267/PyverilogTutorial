@@ -1,0 +1,199 @@
+---
+title: "Assignment 1"
+author: "Ali Prasla"
+date: "February 2, 2018"
+output: html_document
+---
+
+
+# Part one: Linear Regression Analysis
+
+
+## Question One:
+```{r }
+walmart = read.csv("Walmart_Data.csv")
+head(walmart)
+```
+
+Using `str` to find structure of data
+```{r}
+str(walmart)
+```
+
+Using `summary` to summarize the data
+```{r}
+summary(walmart)
+```
+
+Create `logSales` column
+```{r}
+walmart$logSales = log(walmart$Sales)
+summary(walmart$logSales)
+```
+
+## Question Two:
+
+Pairwise correlations between `Sales`, `Promotion` and `Feature`
+
+```{r}
+cor(data.frame(walmart$Sales,walmart$Promotion,walmart$Feature))
+```
+
+Scatter plot of `Sales` v. `Promotion` and `Sales` v. `Feature`
+```{r}
+par(mfrow = c(1,2))
+plot(walmart$Sales, walmart$Promotion,main =  'Sales vs. Promotion',xlab = 'Sales',ylab = 'Promotion')
+plot(walmart$Sales, walmart$Feature,main = 'Sales vs. Feature',xlab = 'Sales', ylab = 'Feature')
+```
+There seems to be a generally positive relationship between Sales/Promotion and Sales/Feature. It seems a weak, but that is expected with sales data over about two years.
+
+
+Histograms  for `Sales` and `logSales`
+```{r}
+par(mfrow = c(1,2))
+hist(walmart$Sales,main = 'Histogram of Sales',xlab= 'Sales')
+hist(walmart$logSales, main = 'Histogram of LogSales',xlab = 'LogSales')
+```
+`Sale` looks relatively normally distributed, but is seriously skewed right `Logsales` looks more normally distributed without the skew as the positives outliers are less prominent in log transformed space.
+
+
+
+## Question Three:
+
+Running linear regression:
+```{r}
+lm1 = lm(logSales ~ Promotion + Feature + Walmart + Holiday, data = walmart)
+summary(lm1)
+```
+
+
+Plotting regression diagnositics
+```{r}
+par(mfrow = c(2,2))
+plot(lm1)
+```
+
+The residuals look to have both zero mean ( Residual vs. Fitted plot) and seem to be normally distributed (Q-Q plot). The data appears to be relatively homoscedastic but is clustered around a logSales number of about 13.3. There are a few outliers in the data impacting the regression coefficients as measured by Cook's distance (rows 59 and 71). Let's look at the data for those rows. 
+
+```{r}
+walmart[c(59,71),]
+```
+While not completely absurd `logSales` values, both of these data points lie outside the 1st and 3rd quantiles. Row 59 is barely outside the 1st quantile so that is probably not an outlier. Row 71 is obviously well outside the 3rd quantile, so we should look to see what percent of the data lies above our value.
+
+```{r}
+sum(walmart$logSales > 13.8422)/length(walmart$logSales)
+```
+
+Around 10% of the data is greater. We should not eliminate this row from the data set either.
+
+
+
+Note, because this is not a log-log regression, the coefficients cannot be interpreted as elasticities.
+
+$B_1$ is the marginal impact of `Promotion` on `logSales`. A one unit increase in `Promotion` can be expected to change `logSales` by .847.
+
+$B_2$: for a one unit increase in `Feature`, `logSales` will increase by .750
+
+$B_3$: Walmart's entry, on average decreased `logSales` by .31127
+
+$B_4$: The Holidays, on average, increased `logSales` by .26
+
+
+$B_3$, the Walmart dummy variable, has a negative coefficient and a very small p_value (6.76e-11). We can safely conclude that Walmart had a measurable impact on Sales
+
+$## Question Four
+
+
+```{r}
+lm2 = lm(logSales ~ Promotion + Feature + Walmart + Holiday + Holiday:Walmart + Holiday:Promotion, data = walmart)
+summary(lm2)
+```
+
+$B_1$ : a one unit increase in `Promotion` can be expected to increase `logSales` by .7454
+
+$B_2$ : a one unit increase in `Feature` can be expected to increase `logSales` by .78
+
+$B_3$: Walmart being present reduced `logSales` by .2978 on average.
+
+$B_4$ , $B_5$ ,  and $B_6$ are not interpretable because of their very high p-values indicating a lack of statistical significance.
+
+
+Comparing models using $R^2$, $AIC$ and $BIC$:
+
+
+```{r}
+paste("Model 1 Adjusted R squared:", (summary(lm1))$adj.r.squared)
+paste("Model 2 Adjusted R squared:", (summary(lm2))$adj.r.squared)
+paste("Model 1 AIC",AIC(lm1))
+paste("Model 2 AIC",AIC(lm2))
+paste("Model 1 BIC",BIC(lm1))
+paste("Model 2 BIC",BIC(lm2))
+```
+
+All three of these metrics indicate that the first model (the simple one) is much better. Not only does the first model have a higher adjusted $R^2$, but it has a lower information loss ($AIC$ & $BIC$). The increased model complexity is not being compensated with more fit.
+
+
+Using backwards regression to find best model
+```{r}
+#scale 0 indicates AIC
+lm3 = step(lm2,direction = "backward",scale = 0)
+summary(lm3)
+```
+
+The final model of the stepwise search (best model) resulted in the first model we tried (`lm1`). 
+
+
+
+#Part Two: Random Effects and HLMs
+
+
+## Question One:
+
+
+Reading data and performing feature engineering
+```{r}
+sow.data = read.csv("CreditCard_SOW_Data.csv")
+sow.data$ConsumerID = as.factor(sow.data$ConsumerID)
+sow.data$logIncome = log(sow.data$Income)
+sow.data$logSowRatio = log(sow.data$WalletShare/ (1 - sow.data$WalletShare))
+head(sow.data)
+```
+
+
+## Question Two:
+Running simple regression
+```{r}
+sow.lm1 = lm(logSowRatio ~ History + Balance + Promotion + History:Promotion + logIncome:Promotion,data = sow.data)
+summary(sow.lm1)
+```
+
+##Question Three:
+
+Running Mixed Effects Linear Model
+```{r}
+library(lme4)
+hlm.1 = lmer(logSowRatio ~ History + Balance + Promotion + Promotion:History + logIncome:Promotion + (1 + Promotion|ConsumerID),data = sow.data,REML = F, control = lmerControl(optimizer = 'Nelder_Mead'))
+summary(hlm.1)
+```
+
+`Promotion` has a random effect due to the second level on $B_2$. 
+
+`History`, `Balance`, `Promotion`, `History x Promotion` and `Promotion x logIncome` have fixed effects.
+
+
+
+The fixed effects are fairly interpretable On average, each unit increase increase in one of these features will affect `logSowRatio` by the coefficient amount. These all of these fixed effects are statistically significant.
+
+
+
+Let's compare the information criteria of the models
+```{r}
+paste("AIC Simple Linear Model:" ,AIC(sow.lm1))
+paste("AIC Mixed Effects:",AIC(hlm.1))
+paste("BIC Simple Linear Model:",BIC(sow.lm1))
+paste("BIC Mixed Effects:",BIC(hlm.1))
+```
+
+Both `BIC` and `AIC` indicate that the multi-level mixed effects model is superior.
+
+
